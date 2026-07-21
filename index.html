@@ -88,7 +88,7 @@ header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
 .tag.red { background:#fee; color:#c0392b; }
 .tag.green { background:#efe; color:#27ae60; }
 .tag.amber { background:#fff8e1; color:#f39c12; }
-.preview-text { background:#f8f9fa; padding:12px; border-radius:6px; font-size:13px; line-height:1.8; margin:8px 0; max-height:200px; overflow-y:auto; white-space:pre-wrap; word-break:break-word; }
+.preview-text { background:#f8f9fa; padding:12px; border-radius:6px; font-size:13px; line-height:1.8; margin:8px 0; max-height:300px; overflow-y:auto; white-space:pre-wrap; word-break:break-word; }
 .rules-panel { background:#f8f9fa; border-radius:8px; padding:16px; margin-top:12px; font-size:13px; }
 .rules-panel table { width:100%; border-collapse:collapse; font-size:12px; }
 .rules-panel td,.rules-panel th { padding:5px 8px; border-bottom:1px solid #e0e0e0; text-align:left; }
@@ -473,8 +473,10 @@ function generateRewrite(text) {
     const regex = new RegExp(r.from.replace(/\*/g,'.*?'), 'gi');
     result = result.replace(regex, r.to);
   }
-  // Clean up double spaces
-  result = result.replace(/\s{2,}/g, ' ').trim();
+  // Clean up: remove double spaces within lines, preserve line breaks
+  result = result.split('\n').map(function(line) {
+    return line.replace(/\s{2,}/g, ' ').trim();
+  }).join('\n');
   return result;
 }
 
@@ -495,7 +497,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 function fillSample() {
   document.getElementById('inputSkuName').value = '健肝素 - Essentiale 健肝素60粒';
   document.getElementById('inputShortDesc').value = '健肝素 ESSENTIALE® LIVER HEALTH (EPL®)\n- 每粒含300mg EPL® 肝內磷脂\n- 修復、更新 強化肝細胞\n- 超過200份醫學實証\n- 減少肝臟脂肪積聚\n- 增強肝臟功能，有助紓解疲勞\n- 增強肝臟解毒能力';
-  document.getElementById('inputDetailDesc').value = '健肝素 ESSENTIALE® 德國製造，醫生選用的護肝品牌, No.1專研護肝＊！\n\n健肝素特含天然EPL® (肝內磷脂)，醫學証實EPL能 3重強效健肝1,2：\n1) 修復受損肝臟細胞\n2) 更新肝臟組織\n3) 強化肝臟功能\n\n- 減少肝臟脂肪積存3\n- 有助紓解疲勞、增強營養吸收4,5\n- 護肝排毒, 避免毒素(如：酒精，藥物，食品添加劑等) 積聚2\n- 具抗氧化功效5\n\n適合:\n- 肝功能欠佳、肝臟脂肪偏高人士\n- 生活忙碌、經常捱夜、夜瞓及睡眠不足人士\n- 經常飲酒傷肝及聚會應酬人士\n- 吸煙、飲食不均衡及長期服用藥物人士\n\n適合成人或12歲以上兒童服用。\n一般保健服量：每日1次，每次2粒\n肝臟脂肪偏高或肝功能欠佳人士服量：每日3次，每次2粒\n\n儲存於25°C以下陰涼乾爽處\n\n#ESSENTIALE #健肝素 #EPL #肝臟健康 #3重強效健肝\n#肝臟脂肪積聚 #捱夜 #高糖高脂 #忙碌生活 #保健品 #飲酒\n\n*IQVIA HKPA, 2Q 2009 – 4Q 2021 (A05B). (Sales by value)\n1. Kuntz et al. Pharmacol Report. 2011; 63:643-659.\n2. Gundermann et al. Alt Med Rev. 1996; 1(4): 258-274.\n3. Dajani et al. BMJ Open Gastro. 2020;7:e000341.\n4. Madisch et al. Arab J Gastro. 2015; 16:99-104.\n5. Gundermann et al. Clinical and Experimental Gastroenterology 2016:9 105–117.\nMAT-HK-2300352-1.0-05/2023';
+  document.getElementById('inputDetailDesc').value = '健肝素 ESSENTIALE® 德國製造，護肝品牌, No.1專研護肝＊！\n\n健肝素特含天然EPL® (肝內磷脂)，醫學証實EPL能 3重強效健肝1,2：\n 1) 有助維持肝臟健康\n 2) 更新肝臟組織\n 3) 強化肝臟功能\n\n- 減少肝臟脂肪積存3\n- 有助紓解疲勞、增強營養吸收4,5\n- 護肝排毒, 避免毒素(如：酒精，藥物，食品添加劑等) 積聚2\n- 具抗氧化功效5\n\n適合:\n- 肝功能欠佳、肝臟脂肪偏高人士\n- 生活忙碌、經常捱夜、夜瞓及睡眠不足人士\n- 經常飲酒傷肝及聚會應酬人士\n- 吸煙、飲食不均衡及長期服用藥物人士\n\n適合成人或12歲以上兒童服用。\n 一般保健服量：每日1次，每次2粒\n關注肝臟健康人士服量：每日3次，每次2粒\n\n儲存於25°C以下陰涼乾爽處\n\n#ESSENTIALE #健肝素 #EPL #肝臟健康 #3重強效健肝\n #有助新陳代謝 #捱夜 #高糖高脂 #忙碌生活 #保健品 #飲酒\n\n*IQVIA HKPA, 2Q 2009 – 4Q 2021 (A05B). (Sales by value)\n1. Kuntz et al. Pharmacol Report. 2011; 63:643-659.\n2. Gundermann et al. Alt Med Rev. 1996; 1(4): 258-274.\n3. Dajani et al. BMJ Open Gastro. 2020;7:e000341.\n4. Madisch et al. Arab J Gastro. 2015; 16:99-104.\n5. Gundermann et al. Clinical and Experimental Gastroenterology 2016:9 105–117.\nMAT-HK-2300352-1.0-05/2023';
   document.getElementById('inputExtra').value = '#ESSENTIALE #健肝素 #EPL #肝臟健康 #3重強效健肝 #有助新陳代謝 #捱夜 #保健品';
 }
 
@@ -878,7 +880,7 @@ function renderResults(results, parsedData) {
 
     // Show original text
     if (r.text) {
-      html += `<div class="preview-text">${escapeHtml(r.text.substring(0,800))}${r.text.length>800?'...':''}</div>`;
+      html += `<div class="preview-text">${escapeHtml(r.text)}</div>`;
     }
 
     // Violations
