@@ -845,26 +845,17 @@ function cleanDescriptionText(text) {
   t = t.replace(/[,，\s]*HKTVmall.*$/, '');
   t = t.replace(/[,，\s]*香港最大網購平台.*$/, '');
   t = t.replace(/[,，\s]*香港網上購物平台.*$/, '');
-  // Add line breaks before common section headers (followed by colon)
-  // This restores paragraph structure from single-line meta descriptions
-  const sectionHeaders = [
-    '主要成份', '成份', '成分', '建議用量', '用量', '用法',
-    '注意事項', '警告', '儲存方式', '貯存', '保存方法',
-    '適用人群', '不適用人群', '適合人士', '產地', '來源',
-    '產品規格', '規格', '有效日期', '保質期',
-    '原產地', '製造商', '進口商', '代理商',
-  ];
-  for (const header of sectionHeaders) {
-    // Match "header:" at start of line or after a period/space
-    const regex = new RegExp('([。.\\n])?' + header + '[：:]', 'g');
-    t = t.replace(regex, function(match, prev) {
-      return (prev ? prev + '\n' : '\n') + header + '：';
-    });
-  }
+  // Ensure section labels ending with ":" are on their own line
+  // Matches patterns like "主要成份:", "適合:", "建議用量:", "注意事項:" etc.
+  t = t.replace(/([^\n])((?:主要成份|成份|成分|建議用量|用量|用法|注意事項|警告|儲存方式|貯存|保存方法|適用人群|不適用人群|適合人士|適合|產地|來源|產品規格|規格|有效日期|保質期|原產地|製造商|進口商|代理商|一般保健服量|關注肝臟健康人士服量|肝臟脂肪偏高或肝功能欠佳人士服量|服量)[：:])/g, '$1\n$2');
+  // Ensure numbered items like "1)", "2)", "3)" or "(1)" or "1." are on their own line
+  t = t.replace(/([^\n])\s*(\d+\s*[\)）.])/g, '$1\n$2');
+  // Ensure each "- " bullet is on its own line
+  t = t.replace(/([^\n])\s*[-–•·]\s*/g, '$1\n- ');
+  // Also handle " -" at start of line (already started newline)
+  t = t.replace(/^[-–•·]\s*/gm, '- ');
   // Clean up duplicate newlines
   t = t.replace(/\n{3,}/g, '\n\n');
-  // Add line break before "-" bullet points that follow text
-  t = t.replace(/([^\n])\s*-\s*/g, '$1\n- ');
   // Clean up spaces around newlines
   t = t.split('\n').map(function(line) {
     return line.trim();
