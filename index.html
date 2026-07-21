@@ -661,6 +661,18 @@ async function fetchAndParseProduct(sku) {
   if (ogDesc && !result.shortDesc) result.shortDesc = ogDesc[1];
   if (ogDesc && ogDesc[1].length > result.shortDesc.length) result.shortDesc = ogDesc[1];
 
+  // Clean up short description — strip product codes, page junk, site footer
+  if (result.shortDesc) {
+    // Remove leading product codes like "CK92377, " or "B0961005_S_..."
+    result.shortDesc = result.shortDesc.replace(/^[A-Z0-9]+\s*,\s*/, '');
+    result.shortDesc = result.shortDesc.replace(/^[A-Z0-9]+_[A-Z0-9_]+\s*,?\s*/, '');
+    // Strip HKTVmall site brand text at end
+    result.shortDesc = result.shortDesc.replace(/[,，\s]*HKTVmall.*$/, '');
+    result.shortDesc = result.shortDesc.replace(/[,，\s]*香港最大網購平台.*$/, '');
+    result.shortDesc = result.shortDesc.replace(/[,，\s]*香港網上購物平台.*$/, '');
+    result.shortDesc = result.shortDesc.trim();
+  }
+
   // 3. Extract raw text from HTML body for detailed parsing
   const bodyText = html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
                        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
@@ -752,6 +764,11 @@ async function fetchAndParseProduct(sku) {
           result.shortDesc = beforeDetail.substring(li, li + 500)
             .replace(/^商品簡介[\s:：]*/, '')
             .replace(/^[^：:]*[：:]\s*/, '').trim();
+          // Clean junk from body-text-extracted short desc too
+          result.shortDesc = result.shortDesc.replace(/^[A-Z0-9]+\s*,\s*/, '');
+          result.shortDesc = result.shortDesc.replace(/[,，\s]*HKTVmall.*$/, '');
+          result.shortDesc = result.shortDesc.replace(/[,，\s]*香港最大網購平台.*$/, '');
+          result.shortDesc = result.shortDesc.trim();
           break;
         }
       }
