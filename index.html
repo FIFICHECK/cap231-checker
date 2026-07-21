@@ -679,23 +679,42 @@ async function fetchAndParseProduct(sku) {
     // Extract from "詳細介紹" onward
     let detailText = bodyText.substring(detailIdx);
 
-    // Cut off at common page end markers
-    const endMarkers = [
-      '商店條款', '送貨/退貨', '最近查看商品', '問問大家',
-      'HKTVmall派送貨品', 'Citi HKTVmall',
-      // Product page UI elements that are NOT part of description
-      '此貨品没有評論', '此貨品沒有評論',
+    // Cut off at common page end markers (matched case-insensitively)
+    // These are HKTVmall page UI elements, NOT product description content
+    const endPatterns = [
+      '此貨品沒有評論', '此貨品没有評論', '全部用家評論', '全部評論',
       '有圖片', '有回覆', '同店推介',
       '經常一起買的貨品', '經常一起購買',
       '進入商店', '香港網上社區藥房超市',
-      '最近查看', '共', '頁)', '頁 )',
+      '最近查看商品', '最近查看',
+      '商店條款', '送貨/退貨', '問問大家',
+      'HKTVmall派送貨品', 'Citi HKTVmall',
+      '版權所有', '免責聲明',
     ];
-    for (const marker of endMarkers) {
-      const mi = detailText.indexOf(marker);
-      if (mi > 0 && mi < 5000) {
-        detailText = detailText.substring(0, mi);
-        break;
+    // Regex patterns for variable formatting
+    const endRegexPatterns = [
+      /共\s*\d+\s*頁/i,      // "共 1 頁"
+      /\(\s*\/\s*共\s*/i,    // "( / 共"
+    ];
+    const detailLower = detailText.toLowerCase();
+    let cutPos = -1;
+    // Check plain text markers
+    for (const pattern of endPatterns) {
+      const pLower = pattern.toLowerCase();
+      const mi = detailLower.indexOf(pLower);
+      if (mi > 100) {
+        if (cutPos === -1 || mi < cutPos) cutPos = mi;
       }
+    }
+    // Check regex markers
+    for (const regex of endRegexPatterns) {
+      const match = regex.exec(detailText);
+      if (match && match.index > 100) {
+        if (cutPos === -1 || match.index < cutPos) cutPos = match.index;
+      }
+    }
+    if (cutPos > 0) {
+      detailText = detailText.substring(0, cutPos);
     }
     result.detailDesc = detailText.trim();
 
