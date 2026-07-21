@@ -439,6 +439,25 @@ function analyzeSection(text, sectionName) {
       catch(e) { regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi'); }
       const matches = text.match(regex);
       if (matches) {
+        // Skip if keyword is in a LEGAL DISCLAIMER context (negative/denial)
+        // e.g. "並不供作診斷" "不應作治療" "不適用於預防"
+        const negationPatterns = [
+          '並不供作', '不供作', '不應作', '不可作', '不適用於',
+          '並非用作', '並不是用作', '不是用作', '不作為',
+          '沒有根據', '未經', '不應被視為', '不能視為',
+          '免責', '只供參考'
+        ];
+        let isDisclaimer = false;
+        for (const neg of negationPatterns) {
+          // Check if the keyword appears within a disclaimer sentence
+          const negRegex = new RegExp(neg + '.{0,30}' + keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'i');
+          if (negRegex.test(text)) {
+            isDisclaimer = true;
+            break;
+          }
+        }
+        if (isDisclaimer) return; // skip this match — it's a legal disclaimer, not a claim
+
         matchedKeywords.push(keyword);
         // Find first occurrence position for text-order sorting
         const firstIdx = text.search(regex);
@@ -473,10 +492,27 @@ function extractContext(text, keyword, w=30) {
 function generateRewrite(text) {
   if (!text) return '';
   let result = text;
+
+  // Protect legal disclaimer sentences from being rewritten
+  // e.g. "此產品並不供作診斷、治療或預防任何疾病之用" should remain unchanged
+  const disclaimerRegex = /(並不供作[^。]*?(?:診斷|治療|預防)[^。]*。)/gi;
+  const protectedDisclaimers = [];
+  result = result.replace(disclaimerRegex, function(match) {
+    protectedDisclaimers.push(match);
+    return '%%DISCLAIMER_' + (protectedDisclaimers.length - 1) + '%%';
+  });
+
+  // Apply replacements
   for (const r of REPLACEMENTS) {
     const regex = new RegExp(r.from.replace(/\*/g,'.*?'), 'gi');
     result = result.replace(regex, r.to);
   }
+
+  // Restore protected disclaimers
+  for (let i = 0; i < protectedDisclaimers.length; i++) {
+    result = result.replace('%%DISCLAIMER_' + i + '%%', protectedDisclaimers[i]);
+  }
+
   // Clean up: remove double spaces within lines, preserve line breaks
   result = result.split('\n').map(function(line) {
     return line.replace(/\s{2,}/g, ' ').trim();
