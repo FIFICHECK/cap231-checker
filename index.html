@@ -146,14 +146,14 @@ footer a { color:#0f3460; }
   <div class="stat-box green"><div class="num" id="totalClean">0</div><div class="label">✅ 安全通過</div></div>
 </div>
 
-<div class="tabs">
-  <div class="tab active" data-tab="input-tab">📝 輸入 & 檢查</div>
-  <div class="tab" data-tab="rules-tab">📜 法例參考</div>
-  <div class="tab" data-tab="about-tab">ℹ️ 關於</div>
+<div class="nav-bar" style="display:flex;gap:0;margin-bottom:20px;background:white;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+  <a href="#section-input" style="flex:1;padding:12px 16px;text-align:center;font-weight:600;color:white;background:#e94560;text-decoration:none;font-size:13px;">📝 輸入 & 檢查</a>
+  <a href="#section-rules" style="flex:1;padding:12px 16px;text-align:center;font-weight:600;color:#555;text-decoration:none;font-size:13px;">📜 法例參考</a>
+  <a href="#section-about" style="flex:1;padding:12px 16px;text-align:center;font-weight:600;color:#555;text-decoration:none;font-size:13px;">ℹ️ 關於</a>
 </div>
 
-<!-- ============= INPUT TAB ============= -->
-<div class="tab-content active" id="input-tab">
+<!-- ============= SECTION 1: INPUT ============= -->
+<div id="section-input">
   <div class="card">
     <h2>🔍 4 部份結構化檢查</h2>
     <div class="legend-bar">
@@ -229,8 +229,8 @@ footer a { color:#0f3460; }
   <div id="resultsContainer" class="results"></div>
 </div>
 
-<!-- ============= RULES TAB ============= -->
-<div class="tab-content" id="rules-tab">
+<!-- ============= SECTION 2: RULES REFERENCE ============= -->
+<div id="section-rules">
   <div class="card">
     <h2>📜 第231章《不良廣告(醫藥)條例》參考</h2>
     <div class="rules-panel">
@@ -267,8 +267,8 @@ footer a { color:#0f3460; }
   </div>
 </div>
 
-<!-- ============= ABOUT TAB ============= -->
-<div class="tab-content" id="about-tab">
+<!-- ============= SECTION 3: ABOUT ============= -->
+<div id="section-about">
   <div class="card">
     <h2>ℹ️ 關於此工具 v2</h2>
     <p style="font-size:14px;line-height:1.8;">
@@ -606,30 +606,8 @@ function suggestHashtags(productName, shortDesc, detailDesc) {
 // ==========================================
 // UI FUNCTIONS
 // ==========================================
-// Tab switching (robust inline style approach)
-document.querySelectorAll('.tab').forEach(function(tab, idx) {
-  tab.addEventListener('click', function() {
-    var tabId = this.dataset.tab;
-    // Remove active from all tabs
-    document.querySelectorAll('.tab').forEach(function(t) {
-      t.classList.remove('active');
-    });
-    // Hide all tab contents
-    document.querySelectorAll('.tab-content').forEach(function(tc) {
-      tc.classList.remove('active');
-      tc.style.display = 'none';
-    });
-    // Activate clicked tab
-    this.classList.add('active');
-    var target = document.getElementById(tabId);
-    if (target) {
-      target.classList.add('active');
-      target.style.display = 'block';
-    }
-  });
-});
-
-// Sample data
+// Tab switching removed — all sections visible as single-page scroll
+// Results tab switching
 function fillSample() {
   document.getElementById('inputSkuName').value = '健肝素 - Essentiale 健肝素60粒';
   document.getElementById('inputShortDesc').value = '健肝素 ESSENTIALE® LIVER HEALTH (EPL®)\n- 每粒含300mg EPL® 肝內磷脂\n- 修復、更新 強化肝細胞\n- 超過200份醫學實証\n- 減少肝臟脂肪積聚\n- 增強肝臟功能，有助紓解疲勞\n- 增強肝臟解毒能力';
