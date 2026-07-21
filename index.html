@@ -673,16 +673,31 @@ async function fetchAndParseProduct(sku) {
     result.shortDesc = result.shortDesc.trim();
   }
 
-  // 3. Extract raw text from HTML body for detailed parsing
-  const bodyText = html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
-                       .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-                       .replace(/<[^>]+>/g, ' ')
-                       .replace(/&nbsp;/g, ' ')
-                       .replace(/&amp;/g, '&')
-                       .replace(/&lt;/g, '<')
-                       .replace(/&gt;/g, '>')
-                       .replace(/\s+/g, ' ')
-                       .trim();
+  // 3. Extract raw text from HTML body — PRESERVE line/paragraph structure
+  let bodyText = html
+    // Remove scripts and styles first
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    // Convert block-level close tags + <br> + <li> + <tr> into newlines
+    .replace(/<\/(div|p|h[1-6]|li|ol|ul|dl|dt|dd|table|tr|td|th|section|article|header|footer|nav|aside|blockquote|pre|address)>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '\n- ')
+    .replace(/<tr[^>]*>/gi, '\n')
+    .replace(/<div[^>]*>/gi, '\n')
+    .replace(/<p[^>]*>/gi, '\n')
+    // Convert remaining tags to space
+    .replace(/<[^>]+>/g, ' ')
+    // Decode common entities
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    // Collapse multiple spaces within lines, preserve newlines
+    .replace(/[ \t]+/g, ' ')
+    // Collapse 3+ consecutive newlines to 2 (preserve paragraph breaks)
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 
   // 4. Find detailed description in the text
   // Skip tab navigation headings — find the REAL content section
