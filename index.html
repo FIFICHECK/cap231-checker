@@ -157,32 +157,42 @@ footer a { color:#0f3460; }
       <span><span class="dot" style="background:#27ae60"></span>🟢 低風險/安全</span>
     </div>
 
-    <!-- Part 1: SKU Name -->
+    <!-- SKU Auto Fetch — Primary Mode -->
+  <div class="card" style="background:linear-gradient(135deg,#f0f4ff,white);border:2px solid #0f3460;">
+    <h2>🚀 SKU 自動擷取 — 首選模式</h2>
+    <div class="section-input">
+      <div class="section-label"><span class="num">▶</span> 輸入 SKU ID，系統自動拆解成 4 部份進行分析</div>
+      <div style="display:flex;gap:10px;">
+        <input type="text" id="skuAutoInput" style="flex:1;padding:14px 18px;font-size:16px;border:2px solid #0f3460;border-radius:8px;font-family:monospace;" placeholder="B0961005_S_4891609702053">
+        <button class="btn btn-primary" onclick="autoCheckSKU()" style="font-size:16px;padding:14px 28px;">🔍 自動檢查</button>
+      </div>
+    </div>
+    <div class="input-hint">💡 系統會 Fetch HKTVmall 產品頁面 → 自動拆解成 產品名稱 / 商品簡介 / 詳細介紹 / Hashtags → 逐部份分析 Cap.231 違規 → 每部份提供完整修改建議</div>
+  </div>
+
+  <!-- Manual 4-part input — Fallback -->
+  <div class="card">
+    <h2>✏️ 或手動輸入（4 部份） <span style="font-size:12px;font-weight:400;color:#888;">用作 Fallback 或預先編輯內容</span></h2>
+
     <div class="section-input">
       <div class="section-label"><span class="num">1</span> 產品名稱 / SKU Name</div>
       <textarea id="inputSkuName" rows="1" placeholder="e.g. 健肝素 - Essentiale 健肝素60粒"></textarea>
     </div>
-
-    <!-- Part 2: 商品簡介 -->
     <div class="section-input">
-      <div class="section-label"><span class="num">2</span> 商品簡介 <span class="tag-sm">（Short Description - 產品頁頂部顯示）</span></div>
+      <div class="section-label"><span class="num">2</span> 商品簡介 <span class="tag-sm">（Short Description）</span></div>
       <textarea id="inputShortDesc" rows="3" placeholder="貼上商品簡介內容..."></textarea>
     </div>
-
-    <!-- Part 3: 詳細介紹 -->
     <div class="section-input">
-      <div class="section-label"><span class="num">3</span> 詳細介紹 <span class="tag-sm">（Detailed Description - 詳細描述部份）</span></div>
+      <div class="section-label"><span class="num">3</span> 詳細介紹 <span class="tag-sm">（Detailed Description）</span></div>
       <textarea id="inputDetailDesc" rows="8" placeholder="貼上詳細介紹內容..."></textarea>
     </div>
-
-    <!-- Part 4 (optional): Extra notes -->
     <div class="section-input">
-      <div class="section-label"><span class="num">4</span> 額外補充 <span class="tag-sm">（如 hashtag、備註等，可選）</span></div>
-      <textarea id="inputExtra" rows="2" placeholder="#hashtags 或其他補充文字（可選）"></textarea>
+      <div class="section-label"><span class="num">4</span> 補充文字 <span class="tag-sm">（hashtags、備註等，可選）</span></div>
+      <textarea id="inputExtra" rows="2" placeholder="#hashtags 或其他補充文字"></textarea>
     </div>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
-      <button class="btn btn-primary" onclick="checkProduct()">🔍 開始檢查</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="checkManualProduct()">🔍 檢查輸入內容</button>
       <button class="btn btn-success" onclick="fillSample()">📋 Load 範例</button>
       <button class="btn btn-outline" onclick="clearAll()">🗑️ 清空</button>
       <div class="file-upload">
@@ -190,14 +200,14 @@ footer a { color:#0f3460; }
         <input type="file" accept=".json" onchange="loadJsonFile(event)">
       </div>
     </div>
-    <div class="input-hint">💡 可以淨係填其中一部份，系統只會檢查有內容嘅欄位。結果會顯示每部份嘅違規 + 完整修改建議。</div>
+    <div class="input-hint">💡 可以只填其中一部份，淨係檢查有內容嘅欄位</div>
   </div>
 
-  <!-- Batch SKU check (simple) -->
+  <!-- Batch SKU Quick Check -->
   <div class="card">
-    <h2>📦 Batch SKU Quick Check <span class="badge">BETA</span></h2>
+    <h2>📦 Batch 批量檢查</h2>
     <div class="section-input">
-      <div class="section-label">SKU IDs（每行一個 SKU）</div>
+      <div class="section-label">SKU IDs（每行一個）</div>
       <textarea id="batchSkuInput" rows="3" placeholder="B0961005_S_4891609702053&#10;B0961005_S_4901234567890"></textarea>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -207,7 +217,7 @@ footer a { color:#0f3460; }
         <input type="file" accept=".csv,.txt" onchange="handleFileUpload(event)">
       </div>
     </div>
-    <div class="input-hint">⚠️ Batch mode 會嘗試 Fetch HKTVmall 產品資料（CORS proxy 可能有限制）</div>
+    <div class="input-hint">⚠️ Batch mode 透過 CORS proxy Fetch HKTVmall 產品資料（⚠️ 會逐個 fetch，有 rate limit）</div>
   </div>
 
   <!-- RESULTS -->
@@ -497,8 +507,8 @@ function clearAll() {
   updateStats(0,0,0,0);
 }
 
-// MAIN CHECK
-function checkProduct() {
+// MAIN CHECK — Manual 4-part input (fallback)
+function checkManualProduct() {
   const sections = [
     {id:'inputSkuName', name:'SKU Name / 產品名稱'},
     {id:'inputShortDesc', name:'商品簡介 (Short Description)'},
@@ -522,37 +532,239 @@ function checkProduct() {
   renderResults(results);
 }
 
-// BATCH SKU CHECK (same as before)
+// ==========================================
+// AUTO CHECK BY SKU (Primary Mode)
+// ==========================================
+async function autoCheckSKU() {
+  const sku = document.getElementById('skuAutoInput').value.trim();
+  if (!sku) { alert('請輸入 SKU ID'); return; }
+
+  document.getElementById('resultsContainer').innerHTML = `<div class="loading">
+    <div class="spinner"></div>
+    🔍 正在擷取產品資料：${escapeHtml(sku)}...<br>
+    <small>透過 CORS proxy Fetch HKTVmall 產品頁面</small>
+  </div>`;
+
+  const parsed = await fetchAndParseProduct(sku);
+  if (parsed.error) {
+    document.getElementById('resultsContainer').innerHTML = `
+      <div class="result-item expanded">
+        <div class="result-header" style="cursor:default;">
+          <div class="sku-info">
+            <span class="sku-status fail">❌</span>
+            <span class="sku">${escapeHtml(sku)}</span>
+          </div>
+        </div>
+        <div class="result-body" style="display:block;">
+          <div class="violation">
+            <div class="v-title">⚠️ 無法自動擷取產品資料</div>
+            <div class="v-detail">${escapeHtml(parsed.error)}</div>
+            <div class="v-fix">
+              <strong>✏️ 解決方法：</strong><br>
+              1. 稍後再試（CORS proxy 可能暫時不穩定）<br>
+              2. 使用下方「✏️ 或手動輸入（4 部份）」模式，自行貼上產品資料<br>
+              3. 或者直接喺瀏覽器打開 <a href="https://www.hktvmall.com/hktv/p/${escapeHtml(sku)}" target="_blank">產品頁面</a> 複製文字貼上
+            </div>
+          </div>
+        </div>
+      </div>`;
+    updateStats(0,0,0,0);
+    return;
+  }
+
+  // Run analysis on each section
+  const sectionDefs = [
+    { key:'skuName', name:'SKU Name / 產品名稱' },
+    { key:'shortDesc', name:'商品簡介 (Short Description)' },
+    { key:'detailDesc', name:'詳細介紹 (Detailed Description)' },
+    { key:'extra', name:'補充文字 / Hashtags' }
+  ];
+  const sections = [];
+  for (const def of sectionDefs) {
+    const text = parsed[def.key] || '';
+    if (text.trim()) {
+      const analysis = analyzeSection(text, def.name);
+      if (analysis) sections.push(analysis);
+    }
+  }
+
+  if (sections.length === 0) {
+    document.getElementById('resultsContainer').innerHTML = `<div class="card" style="text-align:center;color:#888;">無法從產品頁面提取文字內容</div>`;
+    return;
+  }
+
+  renderResults(sections, parsed);
+}
+
+// ==========================================
+// SMART FETCH + PARSE: HKTVmall → 4 Sections
+// ==========================================
+async function fetchAndParseProduct(sku) {
+  const url = `https://www.hktvmall.com/hktv/p/${sku}`;
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  ];
+
+  let html = null;
+  for (const proxy of proxies) {
+    try {
+      const r = await fetch(proxy, { signal: AbortSignal.timeout(10000) });
+      if (r.ok) { html = await r.text(); break; }
+    } catch(e) { continue; }
+  }
+
+  if (!html) {
+    // Try direct (might work from same-origin occasionally)
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (r.ok) html = await r.text();
+    } catch(e) {}
+  }
+
+  if (!html) {
+    return { error: 'CORS proxy 無法取得資料。HKTVmall 需要瀏覽器渲染，靜態 fetch 有限制。請使用手動輸入模式。' };
+  }
+
+  // === PARSE LOGIC ===
+
+  let result = { skuName:'', shortDesc:'', detailDesc:'', extra:'' };
+
+  // 1. Product Name — try multiple sources
+  try {
+    // JSON-LD
+    const jm = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i);
+    if (jm) {
+      const data = JSON.parse(jm[1]);
+      result.skuName = data.name || '';
+    }
+  } catch(e) {}
+  if (!result.skuName) {
+    const tm = html.match(/<title>([^<]+)<\/title>/i);
+    if (tm) result.skuName = tm[1].replace(/\s*\|.*$/,'').trim();
+  }
+  if (!result.skuName) {
+    const hm = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+    if (hm) result.skuName = hm[1].trim();
+  }
+
+  // 2. Short Description (商品簡介) — try meta tags
+  const metaDesc = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i);
+  if (metaDesc) result.shortDesc = metaDesc[1];
+
+  const ogDesc = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i);
+  if (ogDesc && !result.shortDesc) result.shortDesc = ogDesc[1];
+  if (ogDesc && ogDesc[1].length > result.shortDesc.length) result.shortDesc = ogDesc[1];
+
+  // 3. Extract raw text from HTML body for detailed parsing
+  const bodyText = html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
+                       .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+                       .replace(/<[^>]+>/g, ' ')
+                       .replace(/&nbsp;/g, ' ')
+                       .replace(/&amp;/g, '&')
+                       .replace(/&lt;/g, '<')
+                       .replace(/&gt;/g, '>')
+                       .replace(/\s+/g, ' ')
+                       .trim();
+
+  // 4. Find detailed description in the text
+  // Try to find "詳細介紹" section
+  const detailIdx = bodyText.indexOf('詳細介紹');
+  if (detailIdx >= 0) {
+    // Extract from "詳細介紹" onward
+    let detailText = bodyText.substring(detailIdx);
+
+    // Cut off at common page end markers
+    const endMarkers = ['商店條款', '送貨/退貨', '最近查看商品', '問問大家', 'HKTVmall派送貨品', 'Citi HKTVmall'];
+    for (const marker of endMarkers) {
+      const mi = detailText.indexOf(marker);
+      if (mi > 0 && mi < 3000) {
+        detailText = detailText.substring(0, mi);
+        break;
+      }
+    }
+    result.detailDesc = detailText.trim();
+
+    // If we have a short description from meta tags, try to split
+    // shortDesc gets the area BEFORE 詳細介紹 in the body
+    if (!result.shortDesc) {
+      const beforeDetail = bodyText.substring(0, detailIdx);
+      // Find product description area
+      const descLabels = ['商品簡介', '售價', '產地'];
+      for (const label of descLabels) {
+        const li = beforeDetail.indexOf(label);
+        if (li >= 0) {
+          result.shortDesc = beforeDetail.substring(li, li + 500).replace(/^[^：:]*[：:]\s*/, '').trim();
+          break;
+        }
+      }
+      if (!result.shortDesc && beforeDetail.length > 50) {
+        result.shortDesc = beforeDetail.substring(beforeDetail.length - 500).trim();
+      }
+    }
+  } else {
+    // No "詳細介紹" found — use whole body text
+    result.detailDesc = bodyText.substring(0, 3000).trim();
+  }
+
+  // 5. Extract hashtags (#tags)
+  const hashtagMatches = bodyText.match(/#[^\s#,。，、]+/g);
+  if (hashtagMatches) {
+    result.extra = hashtagMatches.join(' ');
+  }
+
+  // 6. Clean up — remove duplicated content between short and detail
+  if (result.shortDesc && result.detailDesc) {
+    // If shortDesc text is already in detailDesc, don't duplicate
+    const shortClean = result.shortDesc.replace(/[-\s]/g, '').substring(0, 50);
+    const detailClean = result.detailDesc.replace(/[-\s]/g, '');
+    if (detailClean.includes(shortClean)) {
+      // Short desc is contained in detail desc — keep short as is, don't modify
+    }
+  }
+
+  // Trim all
+  for (const key of ['skuName','shortDesc','detailDesc','extra']) {
+    result[key] = result[key].trim();
+  }
+
+  return result;
+}
+
+// BATCH SKU CHECK
 async function batchCheckSKUs() {
   const input = document.getElementById('batchSkuInput').value.trim();
   if (!input) { alert('請輸入 SKU ID'); return; }
   const skus = input.split('\n').map(s=>s.trim()).filter(Boolean);
-  document.getElementById('resultsContainer').innerHTML = `<div class="loading"><div class="spinner"></div>Batch 檢查 ${skus.length} 個 SKU...</div>`;
-  let allResults = [];
-  for (const sku of skus) {
+  document.getElementById('resultsContainer').innerHTML = `<div class="loading">
+    <div class="spinner"></div>
+    🔍 Batch 檢查 ${skus.length} 個 SKU...<br>
+    <small>逐個擷取中（CORS proxy 有 rate limit）</small>
+  </div>`;
+
+  let allBatchResults = [];
+  for (let i = 0; i < skus.length; i++) {
+    const sku = skus[i];
+    document.querySelector('.loading small').textContent = `正在處理 ${i+1}/${skus.length}：${sku}`;
     try {
-      const r = await fetchProductAndAnalyze(sku);
-      allResults.push(r);
+      const parsed = await fetchAndParseProduct(sku);
+      if (parsed.error) {
+        allBatchResults.push({sectionName: sku, error: parsed.error, text:'', totalIssues:0, highRisk:0, mediumRisk:0, lowRisk:0, issues:[], matchedKeywords:[]});
+      } else {
+        // Combine all sections into one analysis for batch view
+        const fullText = [parsed.skuName, parsed.shortDesc, parsed.detailDesc, parsed.extra]
+          .filter(Boolean).join('\n---\n');
+        const analysis = analyzeSection(fullText, sku);
+        analysis.sku = sku;
+        analysis.text = fullText;
+        allBatchResults.push(analysis);
+      }
     } catch(e) {
-      allResults.push({sku,error:e.message||'Fetch failed'});
+      allBatchResults.push({sectionName: sku, error: e.message||'Error', text:'', totalIssues:0, highRisk:0, mediumRisk:0, lowRisk:0, issues:[], matchedKeywords:[]});
     }
   }
-  // Convert batch results to section format
-  const sections = allResults.map(r => {
-    return {
-      sectionName: r.sku || 'Unknown',
-      text: r.text || r.error || '',
-      totalIssues: r.totalIssues || 0,
-      highRisk: r.highRisk || 0,
-      mediumRisk: r.mediumRisk || 0,
-      lowRisk: r.lowRisk || 0,
-      issues: r.issues || [],
-      matchedKeywords: r.matchedKeywords || [],
-      isBatch: true,
-      error: r.error
-    };
-  });
-  renderBatchResults(sections, skus.length);
+
+  renderBatchResults(allBatchResults, skus.length);
 }
 
 function handleFileUpload(event) {
@@ -593,18 +805,47 @@ function loadJsonFile(event) {
 // ==========================================
 // RENDER FUNCTIONS
 // ==========================================
-function renderResults(results) {
+function renderResults(results, parsedData) {
   const container = document.getElementById('resultsContainer');
   let totalHigh=0, totalMed=0, totalLow=0;
   results.forEach(r => { totalHigh+=r.highRisk||0; totalMed+=r.mediumRisk||0; totalLow+=r.lowRisk||0; });
   updateStats(results.length, totalHigh, totalMed, results.length);
 
   let html = `<div class="legend-bar">
-    <span>✅ 完成 ${results.length} 個部份檢查</span>
+    <span>✅ 完成 ${results.length}/4 個部份檢查</span>
     <span><span class="dot" style="background:#e94560"></span>🔴 高風險: ${totalHigh}</span>
     <span><span class="dot" style="background:#f39c12"></span>🟡 中度: ${totalMed}</span>
     <span><span class="dot" style="background:#27ae60"></span>🟢 低風險: ${totalLow}</span>
   </div>`;
+
+  // Show what was parsed from the SKU fetch
+  if (parsedData && parsedData.skuName) {
+    html += `<div class="card" style="padding:14px;margin-bottom:16px;">
+      <div style="font-size:12px;color:#888;margin-bottom:6px;">📄 SKU 自動擷取結果 — 已拆解為 4 部份</div>
+      <table class="summary-table">
+        <tr><th style="width:140px;">部份</th><th>內容預覽</th><th style="width:60px;">字數</th><th style="width:60px;">🔴</th><th style="width:60px;">🟡</th></tr>`;
+    const parts = [
+      {key:'skuName', label:'1. 產品名稱'},
+      {key:'shortDesc', label:'2. 商品簡介'},
+      {key:'detailDesc', label:'3. 詳細介紹'},
+      {key:'extra', label:'4. Hashtags'}
+    ];
+    parts.forEach((p, i) => {
+      const text = parsedData[p.key] || '';
+      const res = results[i];
+      const hi = res ? (res.highRisk||0) : 0;
+      const me = res ? (res.mediumRisk||0) : 0;
+      const st = hi>0?'🔴 不合規':(me>0?'🟡 需留意':'✅');
+      html += `<tr>
+        <td><strong>${p.label}</strong></td>
+        <td style="font-size:12px;color:#666;max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(text.substring(0,80))}${text.length>80?'...':''}</td>
+        <td style="text-align:center;font-size:12px;">${text.length}</td>
+        <td style="text-align:center;color:${hi>0?'#e94560':'#aaa'};">${hi||'—'}</td>
+        <td style="text-align:center;color:${me>0?'#f39c12':'#aaa'};">${me||'—'}</td>
+      </tr>`;
+    });
+    html += `</table></div>`;
+  }
 
   results.forEach((r, idx) => {
     const sectionId = 'sec_'+idx;
@@ -787,34 +1028,8 @@ function buildKeywordTable() {
 }
 buildKeywordTable();
 
-// Fetch product (same as v1)
-async function fetchProductAndAnalyze(sku) {
-  const url = `https://www.hktvmall.com/hktv/p/${sku}`;
-  const proxies = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  ];
-  let html = null;
-  for (const proxy of proxies) {
-    try { const r = await fetch(proxy, {signal:AbortSignal.timeout(8000)}); if (r.ok) { html = await r.text(); break; } } catch(e) {}
-  }
-  if (!html) return { sku, error: '無法擷取產品資料（CORS 限制），請使用手動輸入', totalIssues:0, highRisk:0, mediumRisk:0, lowRisk:0, issues:[], matchedKeywords:[] };
-
-  let productName = sku, description = '';
-  try {
-    const jm = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i);
-    if (jm) { const d = JSON.parse(jm[1]); productName = d.name||productName; description = d.description||''; }
-  } catch(e) {}
-  if (!description) { const mm = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i); if(mm) description=mm[1]; }
-  if (!description) { const om = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i); if(om) description=om[1]; }
-  const tm = html.match(/<title>([^<]+)<\/title>/i);
-  if (tm) productName = tm[1].replace(/\s*\|.*$/,'').trim();
-  const analysis = analyzeSection(description, productName);
-  analysis.sku = sku;
-  analysis.productName = productName;
-  analysis.text = description;
-  return analysis;
-}
+// Fetch product • legacy alias kept for compatibility
+const fetchProductAndAnalyze = fetchAndParseProduct;
 </script>
 </body>
 </html>
