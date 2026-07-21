@@ -653,20 +653,7 @@ async function fetchAndParseProduct(sku) {
     if (hm) result.skuName = hm[1].trim();
   }
 
-  // 2. Short Description (商品簡介) — try meta tags
-  const metaDesc = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i);
-  if (metaDesc) result.shortDesc = metaDesc[1];
-
-  const ogDesc = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i);
-  if (ogDesc && !result.shortDesc) result.shortDesc = ogDesc[1];
-  if (ogDesc && ogDesc[1].length > result.shortDesc.length) result.shortDesc = ogDesc[1];
-
-  // Clean up short description — strip product codes, page junk, site footer
-  if (result.shortDesc) {
-    result.shortDesc = cleanDescriptionText(result.shortDesc);
-  }
-
-  // 3. Extract raw text from HTML body — PRESERVE line/paragraph structure
+  // 2. Extract raw text from HTML body — PRESERVE line/paragraph structure
   let bodyText = html
     // Remove scripts and styles first
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
@@ -691,6 +678,38 @@ async function fetchAndParseProduct(sku) {
     // Collapse 3+ consecutive newlines to 2 (preserve paragraph breaks)
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+
+  // 3. Short Description — extract from body text near "商品簡介" label
+  // Priority: body text parsing > meta description (body text preserves page ordering)
+  const shortDescIdx = bodyText.indexOf('商品簡介');
+  if (shortDescIdx >= 0) {
+    // Extract from "商品簡介" heading to next major section heading
+    let shortRaw = bodyText.substring(shortDescIdx + 4); // skip "商品簡介" label
+    // Cut at the next section heading or end marker
+    const shortEndMarkers = ['詳細介紹', '價錢', '售價', '送貨', '產地', '搜尋編號', '評論'];
+    let shortCut = -1;
+    for (const m of shortEndMarkers) {
+      const mi = shortRaw.indexOf(m);
+      if (mi > 0 && (shortCut === -1 || mi < shortCut)) shortCut = mi;
+    }
+    if (shortCut > 0) shortRaw = shortRaw.substring(0, shortCut);
+    result.shortDesc = shortRaw.trim();
+  }
+
+  // Fallback: try meta tags if body text parsing gave nothing useful
+  if (!result.shortDesc || result.shortDesc.length < 10) {
+    const metaDesc = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i);
+    if (metaDesc) result.shortDesc = metaDesc[1];
+    const ogDesc = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i);
+    if (ogDesc && (!result.shortDesc || ogDesc[1].length > result.shortDesc.length)) {
+      result.shortDesc = ogDesc[1];
+    }
+  }
+
+  // Clean up short description
+  if (result.shortDesc) {
+    result.shortDesc = cleanDescriptionText(result.shortDesc);
+  }
 
   // 4. Find detailed description in the text
   // Skip tab navigation headings — find the REAL content section
@@ -764,9 +783,8 @@ async function fetchAndParseProduct(sku) {
       result.detailDesc = cleanDescriptionText(result.detailDesc);
     }
 
-    // If we have a short description from meta tags, try to split
-    // shortDesc gets the area BEFORE 詳細介紹 in the body
-    if (!result.shortDesc) {
+    // If we still don't have a short description, try meta description
+    if (!result.shortDesc || result.shortDesc.length < 10) {
       const beforeDetail = bodyText.substring(0, detailIdx);
       // Find product description area
       const descLabels = ['商品簡介', '售價', '產地'];
