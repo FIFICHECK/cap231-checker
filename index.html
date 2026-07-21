@@ -673,11 +673,32 @@ async function fetchAndParseProduct(sku) {
                        .trim();
 
   // 4. Find detailed description in the text
-  // Try to find "詳細介紹" section
-  const detailIdx = bodyText.indexOf('詳細介紹');
+  // Skip tab navigation headings — find the REAL content section
+  const tabMarkers = ['詳細介紹', '商品詳情', '產品詳情'];
+  let detailIdx = -1;
+  for (const marker of tabMarkers) {
+    let pos = -1;
+    // Find the last occurrence (content area, not tab nav)
+    let lastPos = bodyText.lastIndexOf(marker);
+    // Or find the second occurrence (skip tab navigation)
+    const firstPos = bodyText.indexOf(marker);
+    if (firstPos >= 0) {
+      const afterFirst = bodyText.indexOf(marker, firstPos + marker.length);
+      if (afterFirst >= 0 && (afterFirst - firstPos) < 500) {
+        // Tab nav and content heading are close — use the second one
+        lastPos = afterFirst;
+      }
+    }
+    if (lastPos >= 0) {
+      detailIdx = lastPos;
+      break;
+    }
+  }
   if (detailIdx >= 0) {
     // Extract from "詳細介紹" onward
     let detailText = bodyText.substring(detailIdx);
+    // Strip the "詳細介紹" heading label itself
+    detailText = detailText.replace(/^詳細介紹[\s:：]*/, '').trim();
 
     // Cut off at common page end markers (matched case-insensitively)
     // These are HKTVmall page UI elements, NOT product description content
@@ -728,7 +749,9 @@ async function fetchAndParseProduct(sku) {
       for (const label of descLabels) {
         const li = beforeDetail.indexOf(label);
         if (li >= 0) {
-          result.shortDesc = beforeDetail.substring(li, li + 500).replace(/^[^：:]*[：:]\s*/, '').trim();
+          result.shortDesc = beforeDetail.substring(li, li + 500)
+            .replace(/^商品簡介[\s:：]*/, '')
+            .replace(/^[^：:]*[：:]\s*/, '').trim();
           break;
         }
       }
