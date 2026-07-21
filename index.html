@@ -439,9 +439,12 @@ function analyzeSection(text, sectionName) {
       const matches = text.match(regex);
       if (matches) {
         matchedKeywords.push(keyword);
+        // Find first occurrence position for text-order sorting
+        const firstIdx = text.search(regex);
         issues.push({
           keyword, rule, count: matches.length,
-          context: extractContext(text, keyword)
+          context: extractContext(text, keyword),
+          position: firstIdx >= 0 ? firstIdx : 999999
         });
       }
     });
@@ -882,26 +885,17 @@ function renderResults(results, parsedData) {
     if (r.text) {
       html += `<div class="preview-text">${escapeHtml(r.text)}</div>`;
     }
-
-    // Violations
+    // Violations — show in TEXT ORDER (original position), not grouped by risk level
     if (r.issues && r.issues.length > 0) {
-      // Group by risk
-      const highIssues = r.issues.filter(i=>i.rule.risk==='high');
-      const medIssues = r.issues.filter(i=>i.rule.risk==='medium');
-      const lowIssues = r.issues.filter(i=>i.rule.risk==='low');
-
-      if (highIssues.length > 0) {
-        html += `<div style="margin-top:10px;"><strong style="color:#e94560;">🔴 高風險違規：</strong></div>`;
-        highIssues.forEach(i => html += renderIssue(i));
-      }
-      if (medIssues.length > 0) {
-        html += `<div style="margin-top:10px;"><strong style="color:#f39c12;">🟡 中度風險：</strong></div>`;
-        medIssues.forEach(i => html += renderIssue(i));
-      }
-      if (lowIssues.length > 0) {
-        html += `<div style="margin-top:10px;"><strong style="color:#27ae60;">🟢 低風險提示：</strong></div>`;
-        lowIssues.forEach(i => html += renderIssue(i, true));
-      }
+      // Sort by position in original text
+      const sortedIssues = [...r.issues].sort(function(a, b) {
+        return (a.position || 0) - (b.position || 0);
+      });
+      html += `<div style="margin-top:10px;"><strong>⚠️ 發現 ${sortedIssues.length} 項潛在違規（依原文順序）：</strong></div>`;
+      sortedIssues.forEach(function(i) {
+        const isLow = i.rule.risk === 'low';
+        html += renderIssue(i, isLow);
+      });
     } else {
       html += `<p style="text-align:center;padding:16px;color:#27ae60;">✅ 此部份未發現潛在違規</p>`;
     }
