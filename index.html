@@ -663,14 +663,7 @@ async function fetchAndParseProduct(sku) {
 
   // Clean up short description — strip product codes, page junk, site footer
   if (result.shortDesc) {
-    // Remove leading product codes like "CK92377, " or "B0961005_S_..."
-    result.shortDesc = result.shortDesc.replace(/^[A-Z0-9]+\s*,\s*/, '');
-    result.shortDesc = result.shortDesc.replace(/^[A-Z0-9]+_[A-Z0-9_]+\s*,?\s*/, '');
-    // Strip HKTVmall site brand text at end
-    result.shortDesc = result.shortDesc.replace(/[,，\s]*HKTVmall.*$/, '');
-    result.shortDesc = result.shortDesc.replace(/[,，\s]*香港最大網購平台.*$/, '');
-    result.shortDesc = result.shortDesc.replace(/[,，\s]*香港網上購物平台.*$/, '');
-    result.shortDesc = result.shortDesc.trim();
+    result.shortDesc = cleanDescriptionText(result.shortDesc);
   }
 
   // 3. Extract raw text from HTML body — PRESERVE line/paragraph structure
@@ -766,6 +759,10 @@ async function fetchAndParseProduct(sku) {
       detailText = detailText.substring(0, cutPos);
     }
     result.detailDesc = detailText.trim();
+    // Apply section header cleanup to detail description too
+    if (result.detailDesc) {
+      result.detailDesc = cleanDescriptionText(result.detailDesc);
+    }
 
     // If we have a short description from meta tags, try to split
     // shortDesc gets the area BEFORE 詳細介紹 in the body
@@ -780,10 +777,7 @@ async function fetchAndParseProduct(sku) {
             .replace(/^商品簡介[\s:：]*/, '')
             .replace(/^[^：:]*[：:]\s*/, '').trim();
           // Clean junk from body-text-extracted short desc too
-          result.shortDesc = result.shortDesc.replace(/^[A-Z0-9]+\s*,\s*/, '');
-          result.shortDesc = result.shortDesc.replace(/[,，\s]*HKTVmall.*$/, '');
-          result.shortDesc = result.shortDesc.replace(/[,，\s]*香港最大網購平台.*$/, '');
-          result.shortDesc = result.shortDesc.trim();
+          result.shortDesc = cleanDescriptionText(result.shortDesc);
           break;
         }
       }
@@ -818,6 +812,48 @@ async function fetchAndParseProduct(sku) {
   }
 
   return result;
+}
+
+// ==========================================
+// CLEAN DESCRIPTION TEXT — strip junk, restore paragraph breaks
+// ==========================================
+function cleanDescriptionText(text) {
+  if (!text) return '';
+  let t = text;
+  // Remove leading product codes like "CK92377, " or "B0961005_S_..."
+  t = t.replace(/^[A-Z0-9]+\s*,\s*/, '');
+  t = t.replace(/^[A-Z0-9]+_[A-Z0-9_]+\s*,?\s*/, '');
+  // Strip HKTVmall site brand text at end
+  t = t.replace(/[,，\s]*HKTVmall.*$/, '');
+  t = t.replace(/[,，\s]*香港最大網購平台.*$/, '');
+  t = t.replace(/[,，\s]*香港網上購物平台.*$/, '');
+  // Add line breaks before common section headers (followed by colon)
+  // This restores paragraph structure from single-line meta descriptions
+  const sectionHeaders = [
+    '主要成份', '成份', '成分', '建議用量', '用量', '用法',
+    '注意事項', '警告', '儲存方式', '貯存', '保存方法',
+    '適用人群', '不適用人群', '適合人士', '產地', '來源',
+    '產品規格', '規格', '有效日期', '保質期',
+    '原產地', '製造商', '進口商', '代理商',
+  ];
+  for (const header of sectionHeaders) {
+    // Match "header:" at start of line or after a period/space
+    const regex = new RegExp('([。.\\n])?' + header + '[：:]', 'g');
+    t = t.replace(regex, function(match, prev) {
+      return (prev ? prev + '\n' : '\n') + header + '：';
+    });
+  }
+  // Clean up duplicate newlines
+  t = t.replace(/\n{3,}/g, '\n\n');
+  // Add line break before "-" bullet points that follow text
+  t = t.replace(/([^\n])\s*-\s*/g, '$1\n- ');
+  // Clean up spaces around newlines
+  t = t.split('\n').map(function(line) {
+    return line.trim();
+  }).join('\n');
+  // Remove leading/trailing newlines
+  t = t.replace(/^\n+|\n+$/g, '');
+  return t;
 }
 
 // BATCH SKU CHECK
