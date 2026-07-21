@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cap.231 不良廣告(醫藥)條例 Checker</title>
+<title>Cap.231 不良廣告(醫藥)條例 Checker v2</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Noto Sans HK', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; line-height: 1.6; }
-.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; padding: 20px 40px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
+.container { max-width: 1300px; margin: 0 auto; padding: 20px; }
+header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; padding: 20px 40px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap:wrap; gap:10px; }
 header h1 { font-size: 24px; font-weight: 700; }
 header h1 span { color: #e94560; }
 header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
@@ -16,15 +16,15 @@ header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
 .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 .card h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1a1a2e; display: flex; align-items: center; gap: 8px; }
 .card h2 .badge { background: #e94560; color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
-.input-group { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-.input-group textarea { flex: 1; min-width: 300px; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 80px; font-family: inherit; transition: border-color 0.2s; }
-.input-group textarea:focus { outline: none; border-color: #0f3460; }
-.input-group input[type="text"] { flex: 1; min-width: 200px; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
-.input-group input[type="text"]:focus { outline: none; border-color: #0f3460; }
+.section-input { margin-bottom: 16px; }
+.section-label { font-weight:600; font-size:14px; color:#1a1a2e; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+.section-label .num { background:#0f3460; color:white; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; }
+.section-label .tag-sm { font-size:11px; font-weight:400; color:#888; }
+.section-input textarea { width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; resize:vertical; min-height:60px; font-family:inherit; transition:border-color 0.2s; }
+.section-input textarea:focus { outline:none; border-color:#0f3460; }
 .btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
 .btn-primary { background: #0f3460; color: white; }
 .btn-primary:hover { background: #1a4a7a; transform: translateY(-1px); }
-.btn-primary:disabled { background: #999; cursor: not-allowed; transform: none; }
 .btn-success { background: #27ae60; color: white; }
 .btn-success:hover { background: #219a52; }
 .btn-danger { background: #e94560; color: white; }
@@ -32,13 +32,15 @@ header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
 .btn-outline { background: transparent; border: 2px solid #0f3460; color: #0f3460; }
 .btn-outline:hover { background: #0f3460; color: white; }
 .btn-sm { padding: 6px 14px; font-size: 12px; }
+.btn-gold { background:#d4a017; color:white; }
+.btn-gold:hover { background:#b8860b; }
 .file-upload { position: relative; display: inline-block; }
 .file-upload input[type="file"] { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 .input-hint { font-size: 12px; color: #888; margin-top: 4px; }
-.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
-.stat-box { background: white; border-radius: 10px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-.stat-box .num { font-size: 28px; font-weight: 700; }
-.stat-box .label { font-size: 12px; color: #888; margin-top: 4px; }
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.stat-box { background: white; border-radius: 10px; padding: 14px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.stat-box .num { font-size: 26px; font-weight: 700; }
+.stat-box .label { font-size: 12px; color: #888; margin-top: 2px; }
 .stat-box.red .num { color: #e94560; }
 .stat-box.green .num { color: #27ae60; }
 .stat-box.amber .num { color: #f39c12; }
@@ -47,7 +49,7 @@ header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
 .result-item { background: white; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; }
 .result-header { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s; }
 .result-header:hover { background: #f8f9fa; }
-.result-header .sku-info { display: flex; align-items: center; gap: 10px; }
+.result-header .sku-info { display: flex; align-items: center; gap: 10px; flex-wrap:wrap; }
 .result-header .sku { font-weight: 600; font-size: 15px; }
 .result-header .sku-status { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
 .sku-status.pass { background: #d4edda; color: #155724; }
@@ -58,46 +60,66 @@ header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
 .result-body { padding: 0 18px 18px; display: none; }
 .result-item.expanded .result-body { display: block; }
 .violation { background: #fff5f5; border-left: 3px solid #e94560; padding: 12px; margin: 10px 0; border-radius: 0 6px 6px 0; }
-.violation .v-title { font-weight: 600; color: #c0392b; margin-bottom: 4px; }
+.violation.warn { border-left-color:#f39c12; background:#fffef5; }
+.violation .v-title { font-weight: 600; color:#c0392b; margin-bottom:4px; }
+.violation.warn .v-title { color:#856404; }
 .violation .v-detail { font-size: 13px; color: #555; }
 .violation .v-fix { background: #f0fff4; border: 1px solid #c6f6d5; padding: 10px; border-radius: 6px; margin-top: 8px; font-size: 13px; }
 .violation .v-fix strong { color: #276749; }
-.suggestion-box { background: #e8f4f8; border: 1px solid #b8d4e8; padding: 12px; border-radius: 8px; margin-top: 12px; }
-.suggestion-box .old { color: #e94560; text-decoration: line-through; }
-.suggestion-box .new { color: #27ae60; }
-.suggestion-box .label { font-size: 11px; font-weight: 600; color: #555; }
-.product-name { font-size: 14px; color: #555; margin-top: 2px; }
-.tabs { display: flex; gap: 0; margin-bottom: 20px; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-.tab { flex: 1; padding: 12px; text-align: center; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; border-bottom: 3px solid transparent; }
-.tab:hover { background: #f8f9fa; }
-.tab.active { border-bottom-color: #0f3460; color: #0f3460; background: #f0f4ff; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.loading { text-align: center; padding: 40px; }
-.loading .spinner { width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: #0f3460; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin: 2px; }
-.tag.red { background: #fee; color: #c0392b; }
-.tag.green { background: #efe; color: #27ae60; }
-.tag.amber { background: #fff8e1; color: #f39c12; }
-.preview-text { background: #f8f9fa; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.8; margin: 8px 0; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; }
-.rules-panel { background: #f8f9fa; border-radius: 8px; padding: 16px; margin-top: 12px; font-size: 13px; }
-.rules-panel table { width: 100%; border-collapse: collapse; }
-.rules-panel td, .rules-panel th { padding: 6px 10px; border-bottom: 1px solid #e0e0e0; text-align: left; }
-.rules-panel th { font-weight: 600; color: #555; font-size: 12px; }
-.highlight { background: #fff3cd; padding: 1px 3px; border-radius: 2px; }
-.upload-zone { border: 2px dashed #ccc; border-radius: 10px; padding: 30px; text-align: center; color: #888; transition: all 0.2s; cursor: pointer; }
-.upload-zone:hover, .upload-zone.dragover { border-color: #0f3460; color: #0f3460; background: #f0f4ff; }
-.upload-zone .icon { font-size: 36px; margin-bottom: 8px; }
-.legend-bar { display: flex; gap: 16px; font-size: 12px; color: #666; margin-bottom: 12px; flex-wrap: wrap; }
-.legend-bar .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
-footer { text-align: center; padding: 20px; color: #888; font-size: 12px; }
-footer a { color: #0f3460; }
-@media (max-width: 768px) {
-  .container { padding: 10px; }
-  header { flex-direction: column; text-align: center; gap: 8px; padding: 16px; }
-  .input-group { flex-direction: column; }
-  .input-group textarea { min-width: auto; }
+.section-result { border:1px solid #e0e0e0; border-radius:8px; margin:10px 0; overflow:hidden; }
+.section-result .sr-header { padding:10px 14px; font-weight:600; font-size:14px; background:#f8f9fa; border-bottom:1px solid #e0e0e0; display:flex; justify-content:space-between; align-items:center; }
+.section-result .sr-status { font-size:12px; }
+.section-result .sr-body { padding:14px; }
+.rewrite-box { background:#f0fff4; border:2px solid #c6f6d5; border-radius:8px; padding:14px; margin-top:12px; }
+.rewrite-box .rb-label { font-size:11px; font-weight:600; color:#276749; margin-bottom:6px; }
+.rewrite-box .rb-content { background:white; border:1px solid #c6f6d5; border-radius:6px; padding:12px; font-size:13px; line-height:1.8; white-space:pre-wrap; word-break:break-word; }
+.old-text { color:#e94560; }
+.new-text { color:#27ae60; }
+.tabs { display:flex; gap:0; margin-bottom:20px; background:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.tab { flex:1; padding:12px; text-align:center; font-weight:600; font-size:14px; cursor:pointer; transition:all 0.2s; border-bottom:3px solid transparent; }
+.tab:hover { background:#f8f9fa; }
+.tab.active { border-bottom-color:#0f3460; color:#0f3460; background:#f0f4ff; }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+.loading { text-align:center; padding:40px; }
+.loading .spinner { width:40px; height:40px; border:4px solid #e0e0e0; border-top-color:#0f3460; border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 12px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; margin:2px; }
+.tag.red { background:#fee; color:#c0392b; }
+.tag.green { background:#efe; color:#27ae60; }
+.tag.amber { background:#fff8e1; color:#f39c12; }
+.preview-text { background:#f8f9fa; padding:12px; border-radius:6px; font-size:13px; line-height:1.8; margin:8px 0; max-height:200px; overflow-y:auto; white-space:pre-wrap; word-break:break-word; }
+.rules-panel { background:#f8f9fa; border-radius:8px; padding:16px; margin-top:12px; font-size:13px; }
+.rules-panel table { width:100%; border-collapse:collapse; font-size:12px; }
+.rules-panel td,.rules-panel th { padding:5px 8px; border-bottom:1px solid #e0e0e0; text-align:left; }
+.rules-panel th { font-weight:600; color:#555; }
+.highlight { background:#fff3cd; padding:1px 3px; border-radius:2px; }
+.legend-bar { display:flex; gap:16px; font-size:12px; color:#666; margin-bottom:12px; flex-wrap:wrap; }
+.legend-bar .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; }
+.section-tabs { display:flex; gap:4px; margin-bottom:12px; flex-wrap:wrap; }
+.section-tab { padding:6px 16px; border-radius:20px; font-size:13px; cursor:pointer; transition:all 0.2s; border:2px solid #e0e0e0; background:white; font-weight:500; }
+.section-tab:hover { border-color:#0f3460; }
+.section-tab.active { background:#0f3460; color:white; border-color:#0f3460; }
+.section-tab .scount { display:inline-block; width:18px; height:18px; border-radius:50%; font-size:10px; line-height:18px; text-align:center; margin-left:4px; }
+.section-tab.active .scount { background:rgba(255,255,255,0.3); }
+.section-panel { display:none; }
+.section-panel.active { display:block; }
+.copy-btn { font-size:11px; padding:3px 10px; border:1px solid #27ae60; color:#27ae60; background:white; border-radius:4px; cursor:pointer; }
+.copy-btn:hover { background:#27ae60; color:white; }
+.toggle-all-btn { font-size:12px; padding:4px 12px; border:1px solid #0f3460; color:#0f3460; background:white; border-radius:4px; cursor:pointer; margin-left:8px; }
+.toggle-all-btn:hover { background:#0f3460; color:white; }
+.summary-table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:16px; }
+.summary-table th,.summary-table td { padding:8px 10px; border-bottom:1px solid #eee; text-align:left; }
+.summary-table th { font-weight:600; color:#555; font-size:12px; background:#f8f9fa; }
+.batch-controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+.paginate-info { font-size:12px; color:#888; }
+footer { text-align:center; padding:20px; color:#888; font-size:12px; }
+footer a { color:#0f3460; }
+@media (max-width:768px) {
+  .container { padding:10px; }
+  header { flex-direction:column; text-align:center; padding:16px; }
+  .input-group { flex-direction:column; }
+  .section-input textarea { min-height:50px; }
 }
 </style>
 </head>
@@ -105,79 +127,94 @@ footer a { color: #0f3460; }
 <div class="container">
 <header>
   <div>
-    <h1>🩺 Cap.231 <span>不良廣告(醫藥)條例</span> Checker</h1>
-    <div class="subtitle">HKTVmall 產品描述合規檢查工具 · 自動檢測潛在違規內容及提供修改建議</div>
+    <h1>🩺 Cap.231 <span>不良廣告(醫藥)條例</span> Checker <span style="font-size:14px;opacity:0.7;">v2</span></h1>
+    <div class="subtitle">4部份結構化檢查 · 產品名稱 / 商品簡介 / 詳細介紹 · 自動生成合規修改建議</div>
   </div>
   <div class="leg-badge">第231章</div>
 </header>
 
 <!-- Stats -->
 <div class="stats-row" id="stats">
-  <div class="stat-box blue">
-    <div class="num" id="totalChecked">0</div>
-    <div class="label">已檢查產品</div>
-  </div>
-  <div class="stat-box red">
-    <div class="num" id="totalIssues">0</div>
-    <div class="label">潛在違規</div>
-  </div>
-  <div class="stat-box amber">
-    <div class="num" id="totalWarnings">0</div>
-    <div class="label">中度風險</div>
-  </div>
-  <div class="stat-box green">
-    <div class="num" id="totalClean">0</div>
-    <div class="label">安全通過</div>
-  </div>
+  <div class="stat-box blue"><div class="num" id="totalChecked">0</div><div class="label">已檢查產品</div></div>
+  <div class="stat-box red"><div class="num" id="totalIssues">0</div><div class="label">🔴 高風險</div></div>
+  <div class="stat-box amber"><div class="num" id="totalWarnings">0</div><div class="label">🟡 中度風險</div></div>
+  <div class="stat-box green"><div class="num" id="totalClean">0</div><div class="label">✅ 安全通過</div></div>
 </div>
 
 <div class="tabs">
-  <div class="tab active" data-tab="input-tab">📝 輸入 SKU</div>
+  <div class="tab active" data-tab="input-tab">📝 輸入 & 檢查</div>
   <div class="tab" data-tab="rules-tab">📜 法例參考</div>
   <div class="tab" data-tab="about-tab">ℹ️ 關於</div>
 </div>
 
-<!-- Input Tab -->
+<!-- ============= INPUT TAB ============= -->
 <div class="tab-content active" id="input-tab">
   <div class="card">
-    <h2>🔍 輸入產品資料</h2>
+    <h2>🔍 4 部份結構化檢查</h2>
     <div class="legend-bar">
-      <span><span class="dot" style="background:#e94560"></span>高風險（可能違規）</span>
-      <span><span class="dot" style="background:#f39c12"></span>中度風險（需留意）</span>
-      <span><span class="dot" style="background:#27ae60"></span>低風險/安全</span>
+      <span><span class="dot" style="background:#e94560"></span>🔴 高風險（可能違規）</span>
+      <span><span class="dot" style="background:#f39c12"></span>🟡 中度風險（需留意）</span>
+      <span><span class="dot" style="background:#27ae60"></span>🟢 低風險/安全</span>
     </div>
 
-    <div class="input-group">
-      <textarea id="skuInput" placeholder="輸入 SKU ID，每行一個&#10;例如：&#10;B0961005_S_4891609702053&#10;B0961005_S_4891609702054" rows="4"></textarea>
+    <!-- Part 1: SKU Name -->
+    <div class="section-input">
+      <div class="section-label"><span class="num">1</span> 產品名稱 / SKU Name</div>
+      <textarea id="inputSkuName" rows="1" placeholder="e.g. 健肝素 - Essentiale 健肝素60粒"></textarea>
     </div>
 
-    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
-      <button class="btn btn-primary" onclick="checkSKUs()">🔍 檢查 SKU</button>
-      <button class="btn btn-success" onclick="checkFromClipboard()">📋 貼上即 Check</button>
+    <!-- Part 2: 商品簡介 -->
+    <div class="section-input">
+      <div class="section-label"><span class="num">2</span> 商品簡介 <span class="tag-sm">（Short Description - 產品頁頂部顯示）</span></div>
+      <textarea id="inputShortDesc" rows="3" placeholder="貼上商品簡介內容..."></textarea>
+    </div>
+
+    <!-- Part 3: 詳細介紹 -->
+    <div class="section-input">
+      <div class="section-label"><span class="num">3</span> 詳細介紹 <span class="tag-sm">（Detailed Description - 詳細描述部份）</span></div>
+      <textarea id="inputDetailDesc" rows="8" placeholder="貼上詳細介紹內容..."></textarea>
+    </div>
+
+    <!-- Part 4 (optional): Extra notes -->
+    <div class="section-input">
+      <div class="section-label"><span class="num">4</span> 額外補充 <span class="tag-sm">（如 hashtag、備註等，可選）</span></div>
+      <textarea id="inputExtra" rows="2" placeholder="#hashtags 或其他補充文字（可選）"></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+      <button class="btn btn-primary" onclick="checkProduct()">🔍 開始檢查</button>
+      <button class="btn btn-success" onclick="fillSample()">📋 Load 範例</button>
+      <button class="btn btn-outline" onclick="clearAll()">🗑️ 清空</button>
+      <div class="file-upload">
+        <button class="btn btn-outline">📁 匯入 JSON</button>
+        <input type="file" accept=".json" onchange="loadJsonFile(event)">
+      </div>
+    </div>
+    <div class="input-hint">💡 可以淨係填其中一部份，系統只會檢查有內容嘅欄位。結果會顯示每部份嘅違規 + 完整修改建議。</div>
+  </div>
+
+  <!-- Batch SKU check (simple) -->
+  <div class="card">
+    <h2>📦 Batch SKU Quick Check <span class="badge">BETA</span></h2>
+    <div class="section-input">
+      <div class="section-label">SKU IDs（每行一個 SKU）</div>
+      <textarea id="batchSkuInput" rows="3" placeholder="B0961005_S_4891609702053&#10;B0961005_S_4901234567890"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="batchCheckSKUs()">🔍 Batch 檢查</button>
       <div class="file-upload">
         <button class="btn btn-outline">📁 上傳 CSV</button>
         <input type="file" accept=".csv,.txt" onchange="handleFileUpload(event)">
       </div>
-      <button class="btn btn-outline" onclick="document.getElementById('skuInput').value=''">🗑️ 清空</button>
     </div>
-    <div class="input-hint">💡 SKU 格式：B0961005_S_4891609702053 或只輸入尾部分碼。支援 CSV 上傳（欄位：sku）</div>
+    <div class="input-hint">⚠️ Batch mode 會嘗試 Fetch HKTVmall 產品資料（CORS proxy 可能有限制）</div>
   </div>
 
-  <!-- Manual text input fallback -->
-  <div class="card">
-    <h2>✏️ 或手動輸入產品描述</h2>
-    <div class="input-group">
-      <input type="text" id="manualSku" placeholder="產品名稱/SKU（可選）" style="min-width:150px;max-width:250px;">
-      <textarea id="manualText" placeholder="貼上產品描述文字（商品簡介+詳細介紹），系統會自動分析有無違反 Cap.231" rows="4"></textarea>
-    </div>
-    <button class="btn btn-primary" onclick="checkManualText()">🔍 分析文字</button>
-  </div>
-
-  <!-- Results -->
+  <!-- RESULTS -->
   <div id="resultsContainer" class="results"></div>
 </div>
 
-<!-- Rules Tab -->
+<!-- ============= RULES TAB ============= -->
 <div class="tab-content" id="rules-tab">
   <div class="card">
     <h2>📜 第231章《不良廣告(醫藥)條例》參考</h2>
@@ -186,7 +223,6 @@ footer a { color: #0f3460; }
       <p style="font-size:13px;margin-bottom:12px;">任何人不得發布任何廣告，而該廣告——<br>
       (a) 提述附表1所指明的任何疾病或病理情況；或<br>
       (b) 提述任何物品作為治療或預防該等疾病或情況之用。</p>
-
       <h3 style="margin-bottom:8px;color:#1a1a2e;margin-top:16px;">附表1 — 禁止或限制發布廣告所涉及的疾病</h3>
       <table>
         <tr><th>疾病（中文）</th><th>Disease (English)</th><th>相關產品常見違規</th></tr>
@@ -205,606 +241,501 @@ footer a { color: #0f3460; }
         <tr><td>白內障</td><td>Cataract</td><td>眼睛保健</td></tr>
         <tr><td>青光眼</td><td>Glaucoma</td><td>眼睛保健</td></tr>
       </table>
-
-      <h3 style="margin-bottom:8px;color:#1a1a2e;margin-top:16px;">第3B條 — 禁止有關某些口服產品的廣告</h3>
-      <p style="font-size:13px;">禁止為口服產品作廣告宣傳，而該等廣告載有關乎附表3所指明的口服產品聲稱。</p>
-
       <h3 style="margin-bottom:8px;color:#1a1a2e;margin-top:16px;">第5條 — 罰則</h3>
       <p style="font-size:13px;">首次定罪可處罰款 $50,000 及監禁 3 年，其後每次定罪可處罰款 $100,000 及監禁 3 年。</p>
-
-      <p style="margin-top:16px;font-size:12px;color:#888;">🔗 完整條文：<a href="https://www.elegislation.gov.hk/hk/cap231!zh-Hant-HK" target="_blank">https://www.elegislation.gov.hk/hk/cap231</a></p>
+      <p style="margin-top:16px;font-size:12px;color:#888;">🔗 <a href="https://www.elegislation.gov.hk/hk/cap231!zh-Hant-HK" target="_blank">完整條文</a></p>
     </div>
   </div>
-
   <div class="card">
-    <h2>⚡ 高風險關鍵字列表</h2>
-    <div class="rules-panel">
-      <p style="font-size:13px;margin-bottom:8px;">以下關鍵字/用語在保健產品廣告中可能觸犯 Cap.231：</p>
-      <div id="keywordPreview"></div>
-    </div>
+    <h2>⚡ 高風險關鍵字一覽</h2>
+    <div class="rules-panel" id="keywordPreview"></div>
   </div>
 </div>
 
-<!-- About Tab -->
+<!-- ============= ABOUT TAB ============= -->
 <div class="tab-content" id="about-tab">
   <div class="card">
-    <h2>ℹ️ 關於此工具</h2>
+    <h2>ℹ️ 關於此工具 v2</h2>
     <p style="font-size:14px;line-height:1.8;">
-    <strong>Cap.231 不良廣告(醫藥)條例 Checker</strong> 係一個專為 HKTVmall 商家設計嘅合規檢查工具。<br><br>
-    <strong>功能：</strong><br>
-    • 輸入 SKU ID 自動擷取產品描述<br>
-    • Bulk upload CSV 批次檢查<br>
-    • 自動比對 Cap.231 附表1疾病清單<br>
-    • 提供修改前後建議<br><br>
-    <strong>運作方式：</strong><br>
-    系統會掃描產品描述文字，比對超過 60 個高風險關鍵字及模式，<br>
-    按 <span class="tag red">高風險</span> <span class="tag amber">中度風險</span> <span class="tag green">低風險</span> 分類，並自動建議合規嘅替代字眼。<br><br>
+    <strong>Cap.231 不良廣告(醫藥)條例 Checker v2</strong><br><br>
+    <strong>新增功能：</strong><br>
+    • <strong>4 部份結構化檢查</strong> — 產品名稱、商品簡介、詳細介紹、補充文字分開分析<br>
+    • <strong>逐部份顯示違規</strong> — 清楚知道邊個部份有問題<br>
+    • <strong>完整改寫建議</strong> — 每部份都自動生成合規版本<br>
+    • <strong>一鍵複製</strong> — copy 修改後嘅版本直接使用<br>
+    • 保留 v1 嘅 CSV upload、Batch SKU check、CORS proxy fetch<br><br>
     <strong>注意：</strong>此工具僅供參考，唔構成法律意見。如有疑問請諮詢專業律師。
     </p>
   </div>
 </div>
 
-<footer>
-  <a href="https://fificheck.github.io">FIFICHECK</a> · 第231章不良廣告(醫藥)條例 Checker · 僅供參考
-</footer>
+<footer><a href="https://fificheck.github.io">FIFICHECK</a> · Cap.231 Checker v2 · 僅供參考</footer>
 </div>
 
 <script>
 // ==========================================
 // CAP 231 RULES ENGINE
 // ==========================================
-
 const CAP231_RULES = {
-  // Schedule 1 disease keywords (high risk - referencing these diseases)
   schedule1: {
-    // 肝炎 / 肝臟相關
-    '肝炎': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除「肝炎」字眼，改用「肝臟健康」' },
-    '肝硬化': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除「肝硬化」字眼' },
-    '肝病': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除「肝病」字眼，改用「肝臟健康」' },
-    '肝臟病變': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除，改用一般保健描述' },
-    '脂肪肝': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除「脂肪肝」，改用「關注肝臟健康人士」' },
-    '肝癌': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '絕對不可使用！' },
-    '腫瘤': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除所有腫瘤相關字眼' },
-    '癌症': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '絕對不可使用！' },
-    '癌': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '絕對不可使用！' },
-    '糖尿病': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除，改用「血糖健康」' },
-    '高血壓': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除，改用「心血管健康」' },
-    '心臟病': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除，改用「心臟健康」' },
-    '哮喘': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除' },
-    '關節炎': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除，改用「關節健康」' },
-    '風濕': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除，改用「關節靈活」' },
-    '胃潰瘍': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除，改用「腸胃健康」' },
-    '腎炎': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除，改用「腎臟健康」' },
-    '腎衰竭': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除' },
-    '痔瘡': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除' },
-    '癲癇': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除' },
-    '白內障': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除' },
-    '青光眼': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除' },
-    '肺癆': { risk: 'high', section: '3(1)(a)', schedule: '附表1', fix: '移除' },
+    '肝炎':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'改用「肝臟健康」、「肝臟功能」'},
+    '肝硬化':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'移除「肝硬化」字眼'},
+    '肝病':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'改用「肝臟健康」'},
+    '肝臟病變':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'移除，改用一般保健描述'},
+    '脂肪肝':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'改用「關注肝臟健康人士」'},
+    '肝癌':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'絕對不可使用！'},
+    '腫瘤':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'移除所有腫瘤相關字眼'},
+    '癌症':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'絕對不可使用！'},
+    '癌':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'絕對不可使用！'},
+    '糖尿病':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'改用「血糖健康」'},
+    '高血壓':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'改用「心血管健康」'},
+    '心臟病':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'改用「心臟健康」'},
+    '哮喘':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'移除'},
+    '關節炎':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'改用「關節健康」'},
+    '風濕':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'改用「關節靈活」'},
+    '胃潰瘍':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'改用「腸胃健康」'},
+    '腎炎':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'改用「腎臟健康」'},
+    '腎衰竭':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'移除'},
+    '痔瘡':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'移除'},
+    '癲癇':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'移除'},
+    '白內障':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'移除'},
+    '青光眼':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'移除'},
+    '肺癆':{risk:'high',section:'3(1)(a)',schedule:'附表1',fix:'移除'},
   },
-
-  // Therapeutic claims (high risk - implying treatment)
   therapeutic: {
-    '治療': { risk: 'high', section: '3(1)(b)', fix: '改用「有助維持」「促進」' },
-    '治愈': { risk: 'high', section: '3(1)(b)', fix: '絕對不可使用！' },
-    '醫治': { risk: 'high', section: '3(1)(b)', fix: '改用「幫助」「輔助」' },
-    '診斷': { risk: 'high', section: '3(1)(b)', fix: '移除' },
-    '預防': { risk: 'high', section: '3(1)(b)', fix: '改用「有助維持健康」' },
-    '復發': { risk: 'high', section: '3(1)(b)', fix: '移除' },
-    '病情': { risk: 'high', section: '3(1)(b)', fix: '移除，改用「身體狀況」' },
-    '症狀': { risk: 'high', section: '3(1)(b)', fix: '移除，改用「健康需要」' },
-    '病患': { risk: 'high', section: '3(1)(b)', fix: '移除' },
-    '病患者': { risk: 'high', section: '3(1)(b)', fix: '移除' },
+    '治療':{risk:'high',section:'3(1)(b)',fix:'改用「有助維持」「促進」'},
+    '治愈':{risk:'high',section:'3(1)(b)',fix:'絕對不可使用！'},
+    '醫治':{risk:'high',section:'3(1)(b)',fix:'改用「幫助」「輔助」'},
+    '診斷':{risk:'high',section:'3(1)(b)',fix:'移除'},
+    '預防':{risk:'high',section:'3(1)(b)',fix:'改用「有助維持健康」'},
+    '復發':{risk:'high',section:'3(1)(b)',fix:'移除'},
+    '病情':{risk:'high',section:'3(1)(b)',fix:'改用「身體狀況」'},
+    '症狀':{risk:'high',section:'3(1)(b)',fix:'改用「健康需要」'},
+    '病患':{risk:'high',section:'3(1)(b)',fix:'移除'},
+    '病患者':{risk:'high',section:'3(1)(b)',fix:'移除'},
   },
-
-  // Medical endorsement claims (medium-high risk)
   medicalEndorsement: {
-    '醫生選用': { risk: 'high', section: '一般醫療聲稱', fix: '刪除「醫生」字眼，改用「人氣之選」「用家推薦」' },
-    '醫生推薦': { risk: 'high', section: '一般醫療聲稱', fix: '刪除「醫生」字眼' },
-    '臨床證實': { risk: 'high', section: '一般醫療聲稱', fix: '改用「科研實證」' },
-    '臨床試驗': { risk: 'high', section: '一般醫療聲稱', fix: '改用「研究顯示」' },
-    '醫學實證': { risk: 'medium', section: '一般醫療聲稱', fix: '改為「科研支持」或刪除' },
-    '醫學證實': { risk: 'medium', section: '一般醫療聲稱', fix: '改為「研究顯示」' },
-    '醫學証明': { risk: 'medium', section: '一般醫療聲稱', fix: '改為「研究顯示」' },
-    '藥用': { risk: 'high', section: '一般醫療聲稱', fix: '改用「保健」' },
-    '藥效': { risk: 'high', section: '一般醫療聲稱', fix: '改用「功效」' },
-    '處方': { risk: 'high', section: '一般醫療聲稱', fix: '注意：保健產品不應提處方' },
+    '醫生選用':{risk:'high',section:'一般醫療聲稱',fix:'改用「用家推薦」「人氣之選」'},
+    '醫生推薦':{risk:'high',section:'一般醫療聲稱',fix:'改用「用家推薦」'},
+    '臨床證實':{risk:'high',section:'一般醫療聲稱',fix:'改用「科研實證」'},
+    '臨床試驗':{risk:'high',section:'一般醫療聲稱',fix:'改用「研究顯示」'},
+    '醫學實證':{risk:'medium',section:'一般醫療聲稱',fix:'改用「科研支持」或刪除'},
+    '醫學證實':{risk:'medium',section:'一般醫療聲稱',fix:'改用「研究顯示」'},
+    '醫學証明':{risk:'medium',section:'一般醫療聲稱',fix:'改用「研究顯示」'},
+    '藥用':{risk:'high',section:'一般醫療聲稱',fix:'改用「保健」'},
+    '藥效':{risk:'high',section:'一般醫療聲稱',fix:'改用「功效」'},
+    '處方':{risk:'high',section:'一般醫療聲稱',fix:'保健產品不應提處方'},
   },
-
-  // Liver-specific therapeutic claims (medium-high risk for liver products)
   liverTherapeutic: {
-    '修復受損肝臟細胞': { risk: 'high', section: '3(1)(b)', fix: '改為「有助維持肝臟健康」' },
-    '修復.*肝': { risk: 'high', section: '3(1)(b)', fix: '改為「有助肝臟健康」' },
-    '更新肝臟組織': { risk: 'high', section: '3(1)(b)', fix: '改為「支持肝臟新陳代謝」' },
-    '強化肝臟功能': { risk: 'medium', section: '3(1)(b)', fix: '改為「促進肝臟健康」' },
-    '增強肝臟功能': { risk: 'medium', section: '3(1)(b)', fix: '改為「有助維持肝臟功能」' },
-    '增強肝臟解毒': { risk: 'high', section: '3(1)(b)', fix: '改為「有助肝臟健康」' },
-    '護肝排毒': { risk: 'medium', section: '3(1)(b)', fix: '改用「護肝」「支持肝臟健康」' },
-    '肝臟排毒': { risk: 'medium', section: '3(1)(b)', fix: '改用「支持肝臟自然淨化」' },
-    '減少肝臟脂肪積': { risk: 'high', section: '3(1)(b)', fix: '改為「有助維持肝臟脂肪平衡」' },
-    '肝臟脂肪積': { risk: 'medium', section: '3(1)(b)', fix: '改為「關注肝臟健康人士」' },
-    '肝功能欠佳': { risk: 'high', section: '3(1)(b)', fix: '改為「關注肝臟健康人士」' },
-    '肝功能': { risk: 'medium', section: '3(1)(b)', fix: '改為「肝臟健康」' },
-    '3重強效健肝': { risk: 'medium', section: '一般醫療聲稱', fix: '改為「3重護肝配方」' },
-    '健肝': { risk: 'low', section: '一般保健', fix: '可保留，但避免配合治療性字眼' },
+    '修復受損肝臟細胞':{risk:'high',section:'3(1)(b)',fix:'改為「有助維持肝臟健康」'},
+    '修復.*肝':{risk:'high',section:'3(1)(b)',fix:'改為「有助肝臟健康」'},
+    '更新肝臟組織':{risk:'high',section:'3(1)(b)',fix:'改為「支持肝臟新陳代謝」'},
+    '強化肝臟功能':{risk:'medium',section:'3(1)(b)',fix:'改為「促進肝臟健康」'},
+    '增強肝臟功能':{risk:'medium',section:'3(1)(b)',fix:'改為「有助維持肝臟功能」'},
+    '增強肝臟解毒':{risk:'high',section:'3(1)(b)',fix:'改為「有助肝臟健康」'},
+    '護肝排毒':{risk:'medium',section:'3(1)(b)',fix:'改用「護肝」「支持肝臟健康」'},
+    '肝臟排毒':{risk:'medium',section:'3(1)(b)',fix:'改用「支持肝臟自然淨化」'},
+    '減少肝臟脂肪積':{risk:'high',section:'3(1)(b)',fix:'改為「有助維持肝臟脂肪平衡」'},
+    '肝臟脂肪積':{risk:'medium',section:'3(1)(b)',fix:'改為「關注肝臟健康人士」'},
+    '肝功能欠佳':{risk:'high',section:'3(1)(b)',fix:'改為「關注肝臟健康人士」'},
+    '肝功能':{risk:'medium',section:'3(1)(b)',fix:'改為「肝臟健康」'},
+    '3重強效健肝':{risk:'medium',section:'一般醫療聲稱',fix:'改為「3重護肝配方」'},
+    '健肝':{risk:'low',section:'一般保健',fix:'可保留，但避免配合治療性字眼'},
+    '護肝':{risk:'low',section:'一般保健',fix:'可保留，但避免配合治療性字眼'},
+    '肝臟健康':{risk:'low',section:'一般保健',fix:'可保留'},
   },
-
-  // General problematic claims (medium risk)
   generalClaims: {
-    'No\\.1專研': { risk: 'medium', section: '一般廣告聲稱', fix: '改為「專業護肝配方」或提供實質數據支持' },
-    'No\\.1': { risk: 'medium', section: '一般廣告聲稱', fix: '需要可驗證數據支持，否則建議移除' },
-    '第一品牌': { risk: 'medium', section: '一般廣告聲稱', fix: '需要可驗證數據支持' },
-    '最佳': { risk: 'low', section: '一般廣告聲稱', fix: '需要避免絕對化用語' },
-    '最有效': { risk: 'medium', section: '一般廣告聲稱', fix: '改用「高效」' },
-    '絕對': { risk: 'low', section: '一般廣告聲稱', fix: '避免絕對化用語' },
-    '保證': { risk: 'medium', section: '一般廣告聲稱', fix: '改用「有助」' },
-    '根治': { risk: 'high', section: '3(1)(b)', fix: '絕對不可使用！' },
-    '斷尾': { risk: 'high', section: '3(1)(b)', fix: '絕對不可使用！' },
-    '立即見效': { risk: 'medium', section: '一般醫療聲稱', fix: '改用「持續使用有助」' },
-    '快速見效': { risk: 'medium', section: '一般醫療聲稱', fix: '改用「有助」' },
-    '促進性機能': { risk: 'high', section: '附表2', fix: '移除，附表2禁止' },
-    '壯陽': { risk: 'high', section: '附表2', fix: '絕對不可使用！' },
-    '增精': { risk: 'high', section: '附表2', fix: '絕對不可使用！' },
-    '墮胎': { risk: 'high', section: '第4條', fix: '絕對不可使用！' },
-    '流產': { risk: 'high', section: '第4條', fix: '注意上下文，避免墮胎相關' },
-    '排毒': { risk: 'medium', section: '一般醫療聲稱', fix: '改用「支持身體自然淨化」' },
-    '解毒': { risk: 'high', section: '一般醫療聲稱', fix: '改用「支持身體自然代謝」' },
+    'No\\.1專研':{risk:'medium',section:'一般廣告聲稱',fix:'改為「專業配方」'},
+    'No\\.1':{risk:'medium',section:'一般廣告聲稱',fix:'需可驗證數據，否則移除'},
+    '第一品牌':{risk:'medium',section:'一般廣告聲稱',fix:'需可驗證數據支持'},
+    '最佳':{risk:'low',section:'一般廣告聲稱',fix:'避免絕對化用語'},
+    '最有效':{risk:'medium',section:'一般廣告聲稱',fix:'改用「高效」'},
+    '絕對':{risk:'low',section:'一般廣告聲稱',fix:'避免絕對化用語'},
+    '保證':{risk:'medium',section:'一般廣告聲稱',fix:'改用「有助」'},
+    '根治':{risk:'high',section:'3(1)(b)',fix:'絕對不可使用！'},
+    '斷尾':{risk:'high',section:'3(1)(b)',fix:'絕對不可使用！'},
+    '立即見效':{risk:'medium',section:'一般醫療聲稱',fix:'改用「持續使用有助」'},
+    '快速見效':{risk:'medium',section:'一般醫療聲稱',fix:'改用「有助」'},
+    '促進性機能':{risk:'high',section:'附表2',fix:'移除，附表2禁止'},
+    '壯陽':{risk:'high',section:'附表2',fix:'絕對不可使用！'},
+    '增精':{risk:'high',section:'附表2',fix:'絕對不可使用！'},
+    '墮胎':{risk:'high',section:'第4條',fix:'絕對不可使用！'},
+    '流產':{risk:'high',section:'第4條',fix:'注意上下文，避免墮胎相關'},
+    '排毒':{risk:'medium',section:'一般醫療聲稱',fix:'改用「支持身體自然淨化」'},
+    '解毒':{risk:'high',section:'一般醫療聲稱',fix:'改用「支持身體自然代謝」'},
   }
 };
 
-// Build the keyword reference table for the rules tab
-function buildKeywordTable() {
-  let html = '';
-  let allRules = {};
-  Object.keys(CAP231_RULES).forEach(category => {
-    Object.assign(allRules, CAP231_RULES[category]);
-  });
-  // Group by risk level
-  const groups = { high: [], medium: [], low: [] };
-  Object.entries(allRules).forEach(([kw, rule]) => {
-    if (groups[rule.risk]) groups[rule.risk].push(kw);
-  });
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px;">';
-  ['high','medium','low'].forEach(level => {
-    const label = level === 'high' ? '🔴 高風險' : level === 'medium' ? '🟡 中度風險' : '🟢 低風險';
-    const color = level === 'high' ? '#fee' : level === 'medium' ? '#fff8e1' : '#efe';
-    html += `<div style="background:${color};padding:8px;border-radius:6px;"><strong>${label}</strong><br>`;
-    groups[level].sort().forEach(kw => {
-      html += `<span class="tag ${level === 'high' ? 'red' : level === 'medium' ? 'amber' : 'green'}">${kw.replace(/\*/g,'')}</span> `;
-    });
-    html += '</div>';
-  });
-  html += '</div>';
-  document.getElementById('keywordPreview').innerHTML = html;
-}
-buildKeywordTable();
+// Replacement map for generating rewritten content
+const REPLACEMENTS = [
+  // Liver high-risk
+  {from:'修復受損肝臟細胞',to:'有助維持肝臟健康'},
+  {from:'修復受損肝細胞',to:'有助維持肝臟健康'},
+  {from:'更新肝臟組織',to:'支持肝臟新陳代謝'},
+  {from:'減少肝臟脂肪積存',to:'有助維持肝臟脂肪平衡'},
+  {from:'減少肝臟脂肪積聚',to:'有助維持肝臟脂肪平衡'},
+  {from:'增強肝臟解毒能力',to:'促進肝臟健康'},
+  {from:'增強肝臟解毒',to:'促進肝臟健康'},
+  {from:'增強肝臟功能',to:'促進肝臟健康'},
+  {from:'強化肝臟功能',to:'促進肝臟健康'},
+  {from:'肝功能欠佳',to:'關注肝臟健康'},
+  {from:'肝臟脂肪偏高',to:'關注肝臟健康'},
+  {from:'護肝排毒',to:'護肝保健'},
+  {from:'肝臟排毒',to:'肝臟保健'},
+  {from:'肝臟脂肪積聚',to:'關注肝臟健康'},
+  // Medical claims
+  {from:'醫生選用的',to:'廣受用家推薦的'},
+  {from:'醫生選用',to:'用家推薦'},
+  {from:'醫生推薦',to:'用家推薦'},
+  {from:'臨床證實',to:'科研實證'},
+  {from:'臨床試驗',to:'研究顯示'},
+  {from:'醫學証實',to:'研究顯示'},
+  {from:'醫學證實',to:'研究顯示'},
+  {from:'醫學實證',to:'科研支持'},
+  {from:'醫學實証',to:'科研支持'},
+  {from:'超過200份醫學實証',to:'具科研文獻支持'},
+  {from:'超過200份',to:''},
+  {from:'No\\.1專研護肝',to:'專業護肝配方'},
+  {from:'No\\.1專研',to:'專業'},
+  // General
+  {from:'3重強效健肝',to:'3重護肝配方'},
+  {from:'強效',to:''},  // remove 強效
+  {from:'治療',to:'有助維持'},
+  {from:'預防',to:'有助維持健康'},
+  {from:'排毒',to:'支持身體自然淨化'},
+  {from:'解毒',to:'支持身體自然代謝'},
+  {from:'根治',to:'有助紓緩'},
+  {from:'保證',to:'有助'},
+  {from:'立即見效',to:'持續使用有助'},
+  {from:'快速見效',to:'有助'},
+  {from:'症狀',to:'需要'},
+  {from:'病情',to:'身體狀況'},
+];
 
 // ==========================================
-// ANALYSIS FUNCTIONS
+// ANALYSIS ENGINE
 // ==========================================
-
-function analyzeText(text, productName) {
+function analyzeSection(text, sectionName) {
   if (!text || !text.trim()) return null;
   const issues = [];
   const matchedKeywords = [];
 
   Object.keys(CAP231_RULES).forEach(category => {
     Object.entries(CAP231_RULES[category]).forEach(([keyword, rule]) => {
-      // Convert regex-like patterns
       let pattern = keyword.replace(/\*/g, '.*');
       let regex;
-      try {
-        regex = new RegExp(pattern, 'gi');
-      } catch(e) {
-        regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-      }
+      try { regex = new RegExp(pattern, 'gi'); }
+      catch(e) { regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi'); }
       const matches = text.match(regex);
       if (matches) {
         matchedKeywords.push(keyword);
-        const context = extractContext(text, keyword);
         issues.push({
-          keyword,
-          matchText: matches[0],
-          rule,
-          context,
-          count: matches.length
+          keyword, rule, count: matches.length,
+          context: extractContext(text, keyword)
         });
       }
     });
   });
 
-  // Also check section 3B - oral product claims
-  const oralClaimsCheck = checkOralProductClaims(text);
-  if (oralClaimsCheck) issues.push(oralClaimsCheck);
-
   return {
-    productName: productName || '未命名產品',
-    textLength: text.length,
+    sectionName,
+    text,
     totalIssues: issues.length,
-    highRisk: issues.filter(i => i.rule.risk === 'high').length,
-    mediumRisk: issues.filter(i => i.rule.risk === 'medium').length,
-    lowRisk: issues.filter(i => i.rule.risk === 'low').length,
+    highRisk: issues.filter(i=>i.rule.risk==='high').length,
+    mediumRisk: issues.filter(i=>i.rule.risk==='medium').length,
+    lowRisk: issues.filter(i=>i.rule.risk==='low').length,
     issues,
     matchedKeywords: [...new Set(matchedKeywords)]
   };
 }
 
-function extractContext(text, keyword, windowSize = 30) {
+function extractContext(text, keyword, w=30) {
   const idx = text.toLowerCase().indexOf(keyword.toLowerCase().replace(/\*/g,''));
-  if (idx === -1) return '';
-  const start = Math.max(0, idx - windowSize);
-  const end = Math.min(text.length, idx + keyword.length + windowSize);
-  let ctx = (start > 0 ? '...' : '') + text.substring(start, end) + (end < text.length ? '...' : '');
-  return ctx;
+  if (idx===-1) return '';
+  const s=Math.max(0, idx-w), e=Math.min(text.length, idx+keyword.length+w);
+  return (s>0?'...':'') + text.substring(s,e) + (e<text.length?'...':'');
 }
 
-function checkOralProductClaims(text) {
-  // Section 3B - Schedule 3 oral product claims
-  const oralKeywords = [
-    '增強性能力', '改善性功能', '增大', '延時',
-    '減肥', '瘦身', '快速瘦', '燃脂',
-    '增高', '生髮', '白髮變黑'
-  ];
-  for (const kw of oralKeywords) {
-    if (text.toLowerCase().includes(kw.toLowerCase())) {
-      return {
-        keyword: kw,
-        matchText: kw,
-        rule: { risk: 'high', section: '3B', fix: '移除，附表3禁止的口服產品聲稱' },
-        context: extractContext(text, kw),
-        count: 1
-      };
-    }
+function generateRewrite(text) {
+  if (!text) return '';
+  let result = text;
+  for (const r of REPLACEMENTS) {
+    const regex = new RegExp(r.from.replace(/\*/g,'.*?'), 'gi');
+    result = result.replace(regex, r.to);
   }
-  return null;
-}
-
-function getSuggestionText(keyword, rule) {
-  const fix = rule.fix || '檢討用語';
-  const oldToNew = [
-    ['修復受損肝臟細胞', '有助維持肝臟健康'],
-    ['更新肝臟組織', '支持肝臟新陳代謝'],
-    ['強化肝臟功能', '促進肝臟健康'],
-    ['增強肝臟功能', '有助維持肝臟功能'],
-    ['增強肝臟解毒', '有助肝臟健康'],
-    ['護肝排毒', '支持肝臟健康'],
-    ['減少肝臟脂肪積存', '有助維持肝臟脂肪平衡'],
-    ['減少肝臟脂肪積聚', '有助維持肝臟脂肪平衡'],
-    ['肝臟脂肪偏高', '關注肝臟健康人士'],
-    ['肝功能欠佳', '關注肝臟健康人士'],
-    ['醫生選用', '人氣之選'],
-    ['醫生推薦', '用家推薦'],
-    ['醫學證實', '研究顯示'],
-    ['醫學實證', '科研支持'],
-    ['臨床證實', '科研實證'],
-    ['No.1專研護肝', '專業護肝配方'],
-    ['3重強效健肝', '3重護肝配方'],
-    ['治療', '有助維持'],
-    ['預防', '有助維持健康'],
-    ['排毒', '支持身體自然淨化'],
-    ['解毒', '支持身體自然代謝'],
-  ];
-  for (const [old, neu] of oldToNew) {
-    if (keyword.includes(old) || keyword === old) {
-      return { old, new: neu };
-    }
-  }
-  return { old: keyword, new: fix };
+  // Clean up double spaces
+  result = result.replace(/\s{2,}/g, ' ').trim();
+  return result;
 }
 
 // ==========================================
 // UI FUNCTIONS
 // ==========================================
-
 // Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', function() {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
     this.classList.add('active');
     document.getElementById(this.dataset.tab).classList.add('active');
   });
 });
 
-// Check from clipboard
-async function checkFromClipboard() {
-  try {
-    const text = await navigator.clipboard.readText();
-    document.getElementById('skuInput').value = text;
-    checkSKUs();
-  } catch(e) {
-    alert('無法讀取剪貼簿，請手動貼上 SKU');
-  }
+// Sample data
+function fillSample() {
+  document.getElementById('inputSkuName').value = '健肝素 - Essentiale 健肝素60粒';
+  document.getElementById('inputShortDesc').value = '健肝素 ESSENTIALE® LIVER HEALTH (EPL®)\n- 每粒含300mg EPL® 肝內磷脂\n- 修復、更新 強化肝細胞\n- 超過200份醫學實証\n- 減少肝臟脂肪積聚\n- 增強肝臟功能，有助紓解疲勞\n- 增強肝臟解毒能力';
+  document.getElementById('inputDetailDesc').value = '健肝素 ESSENTIALE® 德國製造，醫生選用的護肝品牌, No.1專研護肝＊！\n\n健肝素特含天然EPL® (肝內磷脂)，醫學証實EPL能 3重強效健肝1,2：\n1) 修復受損肝臟細胞\n2) 更新肝臟組織\n3) 強化肝臟功能\n\n- 減少肝臟脂肪積存3\n- 有助紓解疲勞、增強營養吸收4,5\n- 護肝排毒, 避免毒素(如：酒精，藥物，食品添加劑等) 積聚2\n- 具抗氧化功效5\n\n適合:\n- 肝功能欠佳、肝臟脂肪偏高人士\n- 生活忙碌、經常捱夜、夜瞓及睡眠不足人士\n- 經常飲酒傷肝及聚會應酬人士\n- 吸煙、飲食不均衡及長期服用藥物人士\n\n適合成人或12歲以上兒童服用。\n一般保健服量：每日1次，每次2粒\n肝臟脂肪偏高或肝功能欠佳人士服量：每日3次，每次2粒\n\n儲存於25°C以下陰涼乾爽處\n\n#ESSENTIALE #健肝素 #EPL #肝臟健康 #3重強效健肝\n#肝臟脂肪積聚 #捱夜 #高糖高脂 #忙碌生活 #保健品 #飲酒\n\n*IQVIA HKPA, 2Q 2009 – 4Q 2021 (A05B). (Sales by value)\n1. Kuntz et al. Pharmacol Report. 2011; 63:643-659.\n2. Gundermann et al. Alt Med Rev. 1996; 1(4): 258-274.\n3. Dajani et al. BMJ Open Gastro. 2020;7:e000341.\n4. Madisch et al. Arab J Gastro. 2015; 16:99-104.\n5. Gundermann et al. Clinical and Experimental Gastroenterology 2016:9 105–117.\nMAT-HK-2300352-1.0-05/2023';
+  document.getElementById('inputExtra').value = '#ESSENTIALE #健肝素 #EPL #肝臟健康 #3重強效健肝 #有助新陳代謝 #捱夜 #保健品';
 }
 
-// Handle file upload
+function clearAll() {
+  ['inputSkuName','inputShortDesc','inputDetailDesc','inputExtra','batchSkuInput'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('resultsContainer').innerHTML = '';
+  updateStats(0,0,0,0);
+}
+
+// MAIN CHECK
+function checkProduct() {
+  const sections = [
+    {id:'inputSkuName', name:'SKU Name / 產品名稱'},
+    {id:'inputShortDesc', name:'商品簡介 (Short Description)'},
+    {id:'inputDetailDesc', name:'詳細介紹 (Detailed Description)'},
+    {id:'inputExtra', name:'補充文字 / Hashtags'}
+  ];
+
+  const results = [];
+  for (const s of sections) {
+    const text = document.getElementById(s.id).value.trim();
+    if (!text) continue;
+    const analysis = analyzeSection(text, s.name);
+    if (analysis) results.push(analysis);
+  }
+
+  if (results.length === 0) {
+    alert('請輸入最少一個部份嘅內容');
+    return;
+  }
+
+  renderResults(results);
+}
+
+// BATCH SKU CHECK (same as before)
+async function batchCheckSKUs() {
+  const input = document.getElementById('batchSkuInput').value.trim();
+  if (!input) { alert('請輸入 SKU ID'); return; }
+  const skus = input.split('\n').map(s=>s.trim()).filter(Boolean);
+  document.getElementById('resultsContainer').innerHTML = `<div class="loading"><div class="spinner"></div>Batch 檢查 ${skus.length} 個 SKU...</div>`;
+  let allResults = [];
+  for (const sku of skus) {
+    try {
+      const r = await fetchProductAndAnalyze(sku);
+      allResults.push(r);
+    } catch(e) {
+      allResults.push({sku,error:e.message||'Fetch failed'});
+    }
+  }
+  // Convert batch results to section format
+  const sections = allResults.map(r => {
+    return {
+      sectionName: r.sku || 'Unknown',
+      text: r.text || r.error || '',
+      totalIssues: r.totalIssues || 0,
+      highRisk: r.highRisk || 0,
+      mediumRisk: r.mediumRisk || 0,
+      lowRisk: r.lowRisk || 0,
+      issues: r.issues || [],
+      matchedKeywords: r.matchedKeywords || [],
+      isBatch: true,
+      error: r.error
+    };
+  });
+  renderBatchResults(sections, skus.length);
+}
+
 function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = function(e) {
-    const content = e.target.result;
-    // Try CSV format
-    const lines = content.split('\n').filter(l => l.trim());
+    const lines = e.target.result.split('\n').filter(l=>l.trim());
     const skus = [];
     for (const line of lines) {
       const parts = line.split(',');
-      // Try first column as SKU
-      const sku = parts[0].trim().replace(/^["']|["']$/g, '');
-      if (sku && sku !== 'sku' && sku !== 'SKU') skus.push(sku);
+      let sku = parts[0].trim().replace(/^["']|["']$/g,'');
+      if (sku && sku.toLowerCase() !== 'sku') skus.push(sku);
     }
-    if (skus.length === 0) {
-      // Treat each line as SKU
-      skus.push(...lines.map(l => l.trim()).filter(Boolean));
-    }
-    document.getElementById('skuInput').value = skus.join('\n');
-    if (skus.length > 0) checkSKUs();
+    document.getElementById('batchSkuInput').value = skus.join('\n');
   };
   reader.readAsText(file);
   event.target.value = '';
 }
 
-// Check SKUs (fetch from HKTVmall)
-async function checkSKUs() {
-  const input = document.getElementById('skuInput').value.trim();
-  if (!input) { alert('請輸入最少一個 SKU ID'); return; }
-  const skus = input.split('\n').map(s => s.trim()).filter(Boolean);
-  if (skus.length === 0) return;
-
-  document.getElementById('resultsContainer').innerHTML = `
-    <div class="loading"><div class="spinner"></div>正在檢查 ${skus.length} 個 SKU...<br><small>正在擷取產品資料</small></div>
-  `;
-  updateStats(0, 0, 0, 0);
-
-  let allResults = [];
-  for (const sku of skus) {
+function loadJsonFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
     try {
-      const result = await fetchProductAndAnalyze(sku);
-      allResults.push(result);
-    } catch(e) {
-      allResults.push({ sku, error: e.message, productName: '擷取失敗', totalIssues: 0, highRisk: 0, mediumRisk: 0, lowRisk: 0, issues: [], matchedKeywords: [] });
-    }
-    // Update progress
-    const done = allResults.filter(r => r).length;
-    document.querySelector('.loading small').textContent = `正在處理 ${done}/${skus.length}...`;
-  }
-
-  renderResults(allResults);
+      const data = JSON.parse(e.target.result);
+      if (data.skuName) document.getElementById('inputSkuName').value = data.skuName;
+      if (data.shortDesc) document.getElementById('inputShortDesc').value = data.shortDesc;
+      if (data.detailDesc) document.getElementById('inputDetailDesc').value = data.detailDesc;
+      if (data.extra) document.getElementById('inputExtra').value = data.extra;
+    } catch(err) { alert('JSON 格式錯誤'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
 }
 
-// Check manual text input
-function checkManualText() {
-  const text = document.getElementById('manualText').value.trim();
-  if (!text) { alert('請輸入產品描述文字'); return; }
-  const sku = document.getElementById('manualSku').value.trim() || '手動輸入';
-  const result = analyzeText(text, sku);
-  result.sku = sku;
-  result.isManual = true;
-  result.text = text;
-  renderResults([result]);
-}
-
-// Fetch product from HKTVmall via CORS proxy
-async function fetchProductAndAnalyze(sku) {
-  // Try to fetch from HKTVmall
-  const url = `https://www.hktvmall.com/hktv/p/${sku}`;
-
-  // Try multiple CORS proxies
-  const proxies = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  ];
-
-  let html = null;
-  for (const proxy of proxies) {
-    try {
-      const resp = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
-      if (resp.ok) {
-        html = await resp.text();
-        break;
-      }
-    } catch(e) { continue; }
-  }
-
-  if (!html) {
-    // Try direct fetch (may fail due to CORS)
-    try {
-      const resp = await fetch(url, { signal: AbortSignal.timeout(5000) });
-      if (resp.ok) html = await resp.text();
-    } catch(e) {}
-  }
-
-  if (!html) {
-    return { sku, error: '無法擷取產品資料（CORS限制），請使用手動輸入模式', productName: '擷取失敗', totalIssues: 0, highRisk: 0, mediumRisk: 0, lowRisk: 0, issues: [], matchedKeywords: [] };
-  }
-
-  // Extract product info from HTML
-  let productName = sku;
-  let description = '';
-
-  // Try JSON-LD
-  try {
-    const jsonldMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i);
-    if (jsonldMatch) {
-      const data = JSON.parse(jsonldMatch[1]);
-      productName = data.name || productName;
-      description = data.description || '';
-    }
-  } catch(e) {}
-
-  // Try meta description
-  if (!description) {
-    const metaMatch = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i);
-    if (metaMatch) description = metaMatch[1];
-  }
-
-  // Try og:description
-  if (!description) {
-    const ogMatch = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i);
-    if (ogMatch) description = ogMatch[1];
-  }
-
-  // Try to find product data in window.__INITIAL_STATE__ or similar
-  const stateMatch = html.match(/window\.__INITIAL_STATE__\s*=\s*({[\s\S]*?});/);
-  if (stateMatch) {
-    try {
-      const state = JSON.parse(stateMatch[1]);
-      // Try various paths to find product data
-      const data = state.product || state.productDetail || state.store?.product;
-      if (data) {
-        productName = data.name || data.productName || productName;
-        description = data.description || data.desc || data.detailDesc || data.productDescription || description;
-      }
-    } catch(e) {}
-  }
-
-  // Last resort: extract text from the HTML body
-  if (!description || description.length < 20) {
-    const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-    if (bodyMatch) {
-      const text = bodyMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-      // Find product description area
-      const descIdx = text.indexOf('詳細介紹');
-      if (descIdx > 0) {
-        description = text.substring(descIdx, descIdx + 2000);
-      } else {
-        description = text.substring(0, 2000);
-      }
-    }
-  }
-
-  // Try to get product name from HTML title
-  const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
-  if (titleMatch) productName = titleMatch[1].replace(/\s*\|\s*.*$/, '').trim();
-
-  // Analyze
-  const analysis = analyzeText(description, productName);
-  analysis.sku = sku;
-  analysis.productName = productName;
-  analysis.text = description;
-  return analysis;
-}
-
-// Render results
+// ==========================================
+// RENDER FUNCTIONS
+// ==========================================
 function renderResults(results) {
   const container = document.getElementById('resultsContainer');
-  if (!results || results.length === 0) {
-    container.innerHTML = '<div class="card" style="text-align:center;color:#888;">沒有檢測結果</div>';
-    return;
-  }
+  let totalHigh=0, totalMed=0, totalLow=0;
+  results.forEach(r => { totalHigh+=r.highRisk||0; totalMed+=r.mediumRisk||0; totalLow+=r.lowRisk||0; });
+  updateStats(results.length, totalHigh, totalMed, results.length);
 
-  // Update stats
-  let totalChecked = results.length;
-  let totalHigh = 0, totalMedium = 0, totalClean = 0;
-  let allIssues = [];
-  results.forEach(r => {
-    if (r.error) { totalClean++; return; }
-    totalHigh += r.highRisk || 0;
-    totalMedium += r.mediumRisk || 0;
-    if ((r.highRisk || 0) === 0 && (r.mediumRisk || 0) === 0) totalClean++;
-    if (r.issues) allIssues.push(...r.issues);
-  });
-  updateStats(totalChecked, allIssues.length, totalMedium, totalClean);
-
-  // Build HTML
-  let html = `<div class="legend-bar" style="margin-bottom:16px;">
-    <span>✅ 檢查完成: <strong>${totalChecked}</strong> 個產品</span>
-    <span><span class="dot" style="background:#e94560"></span>高風險: <strong>${totalHigh}</strong></span>
-    <span><span class="dot" style="background:#f39c12"></span>中度風險: <strong>${totalMedium}</strong></span>
+  let html = `<div class="legend-bar">
+    <span>✅ 完成 ${results.length} 個部份檢查</span>
+    <span><span class="dot" style="background:#e94560"></span>🔴 高風險: ${totalHigh}</span>
+    <span><span class="dot" style="background:#f39c12"></span>🟡 中度: ${totalMed}</span>
+    <span><span class="dot" style="background:#27ae60"></span>🟢 低風險: ${totalLow}</span>
   </div>`;
 
-  // Summary table
-  html += `<div class="card" style="padding:16px;margin-bottom:16px;">
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <tr style="border-bottom:2px solid #333;">
-        <th style="padding:6px 8px;text-align:left;">SKU</th>
-        <th style="padding:6px 8px;text-align:left;">產品</th>
-        <th style="padding:6px 8px;text-align:center;">結果</th>
-        <th style="padding:6px 8px;text-align:center;">🔴高</th>
-        <th style="padding:6px 8px;text-align:center;">🟡中</th>
-      </tr>`;
-
-  results.forEach(r => {
-    const status = r.error ? 'fail' : (r.highRisk > 0 ? 'fail' : (r.mediumRisk > 0 ? 'warn' : 'pass'));
-    const statusLabel = r.error ? '❌ 錯誤' : (r.highRisk > 0 ? '🔴 不合規' : (r.mediumRisk > 0 ? '🟡 需留意' : '✅ 通過'));
-    html += `<tr style="border-bottom:1px solid #eee;">
-      <td style="padding:6px 8px;font-family:monospace;font-size:12px;">${r.sku || '—'}</td>
-      <td style="padding:6px 8px;">${r.productName || '—'}</td>
-      <td style="padding:6px 8px;text-align:center;"><span class="sku-status ${status}">${statusLabel}</span></td>
-      <td style="padding:6px 8px;text-align:center;color:${r.highRisk > 0 ? '#e94560' : '#aaa'};">${r.highRisk || 0}</td>
-      <td style="padding:6px 8px;text-align:center;color:${r.mediumRisk > 0 ? '#f39c12' : '#aaa'};">${r.mediumRisk || 0}</td>
-    </tr>`;
-  });
-  html += `</table></div>`;
-
-  // Detailed results
   results.forEach((r, idx) => {
-    if (r.error) {
-      html += `<div class="result-item">
-        <div class="result-header" onclick="toggleResult(this)">
-          <div class="sku-info">
-            <span class="sku-status fail">❌</span>
-            <span class="sku">${r.sku}</span>
-            <span class="product-name">${r.error}</span>
-          </div>
-          <span class="arrow">▼</span>
-        </div>
-        <div class="result-body">
-          <div class="violation">
-            <div class="v-title">⚠️ 無法擷取產品資料</div>
-            <div class="v-detail">${r.error}</div>
-            <div class="v-fix">建議使用「手動輸入產品描述」模式</div>
-          </div>
-        </div>
-      </div>`;
-      return;
-    }
+    const sectionId = 'sec_'+idx;
+    const st = r.highRisk > 0 ? 'fail' : (r.mediumRisk > 0 ? 'warn' : 'pass');
+    const stIcon = r.highRisk > 0 ? '🔴 不合規' : (r.mediumRisk > 0 ? '🟡 需留意' : '✅ 通過');
 
-    const statusIcon = r.highRisk > 0 ? '🔴' : (r.mediumRisk > 0 ? '🟡' : '✅');
-    const statusLabel = r.highRisk > 0 ? '不合規' : (r.mediumRisk > 0 ? '需留意' : '通過');
-    const statusClass = r.highRisk > 0 ? 'fail' : (r.mediumRisk > 0 ? 'warn' : 'pass');
-
-    html += `<div class="result-item">
-      <div class="result-header" onclick="toggleResult(this)">
+    html += `<div class="result-item expanded">
+      <div class="result-header" onclick="this.parentElement.classList.toggle('expanded')">
         <div class="sku-info">
-          <span class="sku-status ${statusClass}">${statusIcon} ${statusLabel}</span>
-          <span class="sku">${r.sku || '手動輸入'}</span>
-          <span class="product-name">${r.productName}</span>
+          <span class="sku-status ${st}">${stIcon}</span>
+          <span class="sku">${r.sectionName}</span>
         </div>
         <div>
-          <span style="font-size:12px;color:#888;margin-right:8px;">🔴${r.highRisk||0} 🟡${r.mediumRisk||0}</span>
+          <span style="font-size:12px;color:#888;margin-right:8px;">
+            ${'🔴'+(r.highRisk||0)} ${'🟡'+(r.mediumRisk||0)} ${'🟢'+(r.lowRisk||0)}
+          </span>
           <span class="arrow">▼</span>
         </div>
       </div>
       <div class="result-body">`;
 
+    // Show original text
     if (r.text) {
-      html += `<div class="preview-text">${escapeHtml(r.text.substring(0, 500))}${r.text.length > 500 ? '...' : ''}</div>`;
+      html += `<div class="preview-text">${escapeHtml(r.text.substring(0,800))}${r.text.length>800?'...':''}</div>`;
     }
 
+    // Violations
     if (r.issues && r.issues.length > 0) {
-      r.issues.forEach(issue => {
-        const riskColor = issue.rule.risk === 'high' ? '#e94560' : (issue.rule.risk === 'medium' ? '#f39c12' : '#27ae60');
-        const riskLabel = issue.rule.risk === 'high' ? '🔴 高風險' : (issue.rule.risk === 'medium' ? '🟡 中度風險' : '🟢 低風險');
-        const suggest = getSuggestionText(issue.keyword, issue.rule);
-        html += `<div class="violation">
-          <div class="v-title">
-            <span class="tag ${issue.rule.risk === 'high' ? 'red' : issue.rule.risk === 'medium' ? 'amber' : 'green'}">${riskLabel}</span>
-            發現 <strong>"${escapeHtml(issue.keyword)}"</strong>（${issue.count}次）
-          </div>
-          <div class="v-detail">
-            引用條文：${issue.rule.section || issue.rule.schedule || '—'}<br>
-            上下文：<span class="highlight">${escapeHtml(issue.context)}</span>
-          </div>
-          <div class="v-fix">
-            <strong>✏️ 建議修改：</strong><br>
-            <span class="old">❌ ${escapeHtml(suggest.old)}</span><br>
-            <span class="new">✅ ${escapeHtml(suggest.new)}</span>
-          </div>
-        </div>`;
-      });
+      // Group by risk
+      const highIssues = r.issues.filter(i=>i.rule.risk==='high');
+      const medIssues = r.issues.filter(i=>i.rule.risk==='medium');
+      const lowIssues = r.issues.filter(i=>i.rule.risk==='low');
+
+      if (highIssues.length > 0) {
+        html += `<div style="margin-top:10px;"><strong style="color:#e94560;">🔴 高風險違規：</strong></div>`;
+        highIssues.forEach(i => html += renderIssue(i));
+      }
+      if (medIssues.length > 0) {
+        html += `<div style="margin-top:10px;"><strong style="color:#f39c12;">🟡 中度風險：</strong></div>`;
+        medIssues.forEach(i => html += renderIssue(i));
+      }
+      if (lowIssues.length > 0) {
+        html += `<div style="margin-top:10px;"><strong style="color:#27ae60;">🟢 低風險提示：</strong></div>`;
+        lowIssues.forEach(i => html += renderIssue(i, true));
+      }
     } else {
-      html += `<p style="text-align:center;padding:20px;color:#27ae60;">✅ 未發現潛在違規</p>`;
+      html += `<p style="text-align:center;padding:16px;color:#27ae60;">✅ 此部份未發現潛在違規</p>`;
+    }
+
+    // Rewrite suggestion
+    const rewritten = generateRewrite(r.text);
+    if (rewritten !== r.text) {
+      html += `<div class="rewrite-box">
+        <div class="rb-label">✏️ 建議修改後內容 <button class="copy-btn" onclick="copyText(this)">📋 複製</button></div>
+        <div class="rb-content">${escapeHtml(rewritten)}</div>
+      </div>`;
+    }
+
+    html += `</div></div>`; // close result-body, result-item
+  });
+
+  container.innerHTML = html;
+}
+
+function renderIssue(issue, isLow) {
+  const riskColor = isLow ? '#27ae60' : (issue.rule.risk==='high' ? '#e94560' : '#f39c12');
+  const wClass = issue.rule.risk==='high' ? '' : ' warn';
+  const riskLabel = issue.rule.risk==='high' ? '🔴' : (issue.rule.risk==='medium' ? '🟡' : '🟢');
+  return `<div class="violation${wClass}">
+    <div class="v-title">${riskLabel} "${escapeHtml(issue.keyword)}" × ${issue.count}次</div>
+    <div class="v-detail">
+      引用：${issue.rule.section||issue.rule.schedule||'—'}
+      · 上下文：<span class="highlight">${escapeHtml(issue.context)}</span>
+    </div>
+    <div class="v-fix"><strong>✏️ 建議：</strong>${escapeHtml(issue.rule.fix)}</div>
+  </div>`;
+}
+
+function renderBatchResults(results, totalSku) {
+  const container = document.getElementById('resultsContainer');
+  let totalHigh=0, totalMed=0, clean=0;
+  results.forEach(r => { if(r.error)clean++; else { totalHigh+=r.highRisk||0; totalMed+=r.mediumRisk||0; if((r.highRisk||0)+(r.mediumRisk||0)===0) clean++; } });
+  updateStats(totalSku, totalHigh, totalMed, clean);
+
+  let html = `<div class="legend-bar">
+    <span>✅ Batch 完成 ${results.length}/${totalSku} 個</span>
+    <span><span class="dot" style="background:#e94560"></span>🔴 高風險: ${totalHigh}</span>
+    <span><span class="dot" style="background:#f39c12"></span>🟡 中度: ${totalMed}</span>
+  </div>`;
+
+  // Summary table
+  html += `<div class="card" style="padding:14px;margin-bottom:16px;">
+    <table class="summary-table">
+      <tr><th>SKU</th><th>結果</th><th>🔴</th><th>🟡</th></tr>`;
+  results.forEach(r => {
+    const st = r.error ? 'fail' : (r.highRisk>0?'fail':(r.mediumRisk>0?'warn':'pass'));
+    const stL = r.error ? '❌ 錯誤' : (r.highRisk>0?'🔴 不合規':(r.mediumRisk>0?'🟡 需留意':'✅ 通過'));
+    html += `<tr>
+      <td style="font-family:monospace;font-size:12px;">${escapeHtml(r.sectionName||'?')}</td>
+      <td><span class="sku-status ${st}">${stL}</span></td>
+      <td style="color:${(r.highRisk||0)>0?'#e94560':'#aaa'}">${r.highRisk||0}</td>
+      <td style="color:${(r.mediumRisk||0)>0?'#f39c12':'#aaa'}">${r.mediumRisk||0}</td>
+    </tr>`;
+  });
+  html += `</table></div>`;
+
+  // Detail for each
+  results.forEach(r => {
+    const st = r.error ? 'fail' : (r.highRisk>0?'fail':(r.mediumRisk>0?'warn':'pass'));
+    const stIcon = r.error ? '❌' : (r.highRisk>0?'🔴':'🟡');
+    html += `<div class="result-item">
+      <div class="result-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="sku-info">
+          <span class="sku-status ${st}">${stIcon}</span>
+          <span class="sku">${r.sectionName||'?'}</span>
+        </div>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="result-body">`;
+    if (r.error) {
+      html += `<div class="violation"><div class="v-title">⚠️ 無法擷取</div>
+        <div class="v-detail">${escapeHtml(r.error)}</div>
+        <div class="v-fix">建議使用上方「4 部份結構化檢查」手動輸入</div></div>`;
+    } else {
+      if (r.text) html += `<div class="preview-text">${escapeHtml(r.text.substring(0,300))}</div>`;
+      if (r.issues && r.issues.length>0) {
+        r.issues.slice(0,8).forEach(i => html += renderIssue(i));
+        if (r.issues.length>8) html += `<p style="color:#888;font-size:12px;">...仲有 ${r.issues.length-8} 項違規</p>`;
+      } else {
+        html += `<p style="color:#27ae60;padding:10px;">✅ 未發現違規</p>`;
+      }
     }
     html += `</div></div>`;
   });
@@ -812,22 +743,77 @@ function renderResults(results) {
   container.innerHTML = html;
 }
 
-function toggleResult(el) {
-  el.parentElement.classList.toggle('expanded');
+// Copy text
+function copyText(btn) {
+  const content = btn.parentElement.nextElementSibling;
+  if (!content) return;
+  const text = content.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ 已複製';
+    setTimeout(() => btn.textContent = '📋 複製', 2000);
+  }).catch(() => alert('複製失敗'));
 }
 
-function updateStats(checked, high, medium, clean) {
+// Utils
+function updateStats(checked, high, med, total) {
   document.getElementById('totalChecked').textContent = checked;
   document.getElementById('totalIssues').textContent = high;
-  document.getElementById('totalWarnings').textContent = medium;
-  document.getElementById('totalClean').textContent = clean;
+  document.getElementById('totalWarnings').textContent = med;
+  document.getElementById('totalClean').textContent = total;
 }
 
 function escapeHtml(text) {
   if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+  const d = document.createElement('div');
+  d.textContent = String(text);
+  return d.innerHTML;
+}
+
+// Build keyword table
+function buildKeywordTable() {
+  let all = {};
+  Object.keys(CAP231_RULES).forEach(cat => Object.assign(all, CAP231_RULES[cat]));
+  const g = {high:[],medium:[],low:[]};
+  Object.entries(all).forEach(([kw,r]) => { if (g[r.risk]) g[r.risk].push(kw); });
+  let h = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px;">';
+  ['high','medium','low'].forEach(l => {
+    const c = l==='high'?'#fee':(l==='medium'?'#fff8e1':'#efe');
+    h += `<div style="background:${c};padding:8px;border-radius:6px;"><strong>${l==='high'?'🔴 高風險':(l==='medium'?'🟡 中度':'🟢 低風險')}</strong><br>`;
+    g[l].sort().forEach(kw => h += `<span class="tag ${l==='high'?'red':(l==='medium'?'amber':'green')}">${kw.replace(/\*/g,'')}</span> `);
+    h += '</div>';
+  });
+  h += '</div>';
+  document.getElementById('keywordPreview').innerHTML = h;
+}
+buildKeywordTable();
+
+// Fetch product (same as v1)
+async function fetchProductAndAnalyze(sku) {
+  const url = `https://www.hktvmall.com/hktv/p/${sku}`;
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  ];
+  let html = null;
+  for (const proxy of proxies) {
+    try { const r = await fetch(proxy, {signal:AbortSignal.timeout(8000)}); if (r.ok) { html = await r.text(); break; } } catch(e) {}
+  }
+  if (!html) return { sku, error: '無法擷取產品資料（CORS 限制），請使用手動輸入', totalIssues:0, highRisk:0, mediumRisk:0, lowRisk:0, issues:[], matchedKeywords:[] };
+
+  let productName = sku, description = '';
+  try {
+    const jm = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i);
+    if (jm) { const d = JSON.parse(jm[1]); productName = d.name||productName; description = d.description||''; }
+  } catch(e) {}
+  if (!description) { const mm = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i); if(mm) description=mm[1]; }
+  if (!description) { const om = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i); if(om) description=om[1]; }
+  const tm = html.match(/<title>([^<]+)<\/title>/i);
+  if (tm) productName = tm[1].replace(/\s*\|.*$/,'').trim();
+  const analysis = analyzeSection(description, productName);
+  analysis.sku = sku;
+  analysis.productName = productName;
+  analysis.text = description;
+  return analysis;
 }
 </script>
 </body>
