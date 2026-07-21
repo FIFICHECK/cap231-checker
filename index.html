@@ -88,6 +88,11 @@ header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
 .tag.red { background:#fee; color:#c0392b; }
 .tag.green { background:#efe; color:#27ae60; }
 .tag.amber { background:#fff8e1; color:#f39c12; }
+/* Violation highlighting */
+.preview-text .v-highlight { background:#ffe0e0; color:#c0392b; padding:1px 2px; border-radius:3px; font-weight:600; }
+/* Change highlighting in rewrite */
+.rb-content .c-added { color:#1a6bff; font-weight:600; }
+.rb-content .c-removed { background:#ffd7d7; color:#c0392b; text-decoration:line-through; }
 .preview-text { background:#f8f9fa; padding:12px; border-radius:6px; font-size:13px; line-height:2.0; margin:8px 0; max-height:300px; overflow-y:auto; word-break:break-word; }
 .rewrite-box .rb-content { background:white; border:1px solid #c6f6d5; border-radius:6px; padding:12px; font-size:13px; line-height:2.0; word-break:break-word; }
 .rules-panel table { width:100%; border-collapse:collapse; font-size:12px; }
@@ -1123,9 +1128,9 @@ function renderResults(results, parsedData) {
       </div>
       <div class="result-body">`;
 
-    // Show original text
+    // Show original text with RED highlighted violations
     if (r.text) {
-      html += `<div class="preview-text">${nl2br(r.text)}</div>`;
+      html += `<div class="preview-text">${highlightViolations(r.text, r.issues)}</div>`;
     }
     // Violations — show in TEXT ORDER (original position), not grouped by risk level
     if (r.issues && r.issues.length > 0) {
@@ -1142,18 +1147,20 @@ function renderResults(results, parsedData) {
       html += `<p style="text-align:center;padding:16px;color:#27ae60;">✅ 此部份未發現潛在違規</p>`;
     }
 
-    // Rewrite suggestion
-    const rewritten = generateRewrite(r.text);
-    const isHashtagSection = r.sectionName && r.sectionName.indexOf('Hashtag') >= 0;
-    var showRewrite = (rewritten !== r.text);
+    // Rewrite suggestion with BLUE highlighted changes
+    var rewritten = generateRewrite(r.text);
+    var smartRewrite = generateSmartRewrite(r.text);
+    var isHashtagSection = r.sectionName && r.sectionName.indexOf('Hashtag') >= 0;
+    var showRewrite = (smartRewrite.text !== r.text);
 
-    // For hashtag section: also suggest tags if empty or generateRewrite changed nothing
+    // For hashtag section: also suggest tags if empty
     if (isHashtagSection && !showRewrite && r.text && r.text.trim().length < 3) {
       showRewrite = true;
     }
 
     if (showRewrite) {
-      var rewriteContent = rewritten;
+      var rewriteContent = smartRewrite.text;
+      var rewriteHtml = smartRewrite.html;
       // For hashtag section with no content, suggest hashtags
       if (isHashtagSection && (!rewriteContent || rewriteContent.trim().length < 3)) {
         var suggested = suggestHashtags(
@@ -1163,11 +1170,16 @@ function renderResults(results, parsedData) {
         );
         if (suggested) {
           rewriteContent = suggested;
+          rewriteHtml = '<span class="c-added">' + escapeHtml(suggested.replace(/\n/g, '<br>')) + '</span>';
         }
       }
+
+      var labelText = isHashtagSection && (!r.text || r.text.trim().length < 3)
+        ? '建議 Hashtags（原產品無 hashtags）'
+        : '建議修改後內容（<span style="color:#1a6bff;">藍色</span> = 已修改部份）';
       html += `<div class="rewrite-box">
-        <div class="rb-label">✏️ ${isHashtagSection && (!r.text || r.text.trim().length < 3) ? '建議 Hashtags（原產品無 hashtags）' : '建議修改後內容'} <button class="copy-btn" onclick="copyText(this)">📋 複製</button></div>
-        <div class="rb-content">${nl2br(rewriteContent)}</div>
+        <div class="rb-label">✏️ ${labelText} <button class="copy-btn" onclick="copyText(this)">📋 複製</button></div>
+        <div class="rb-content">${rewriteHtml}</div>
       </div>`;
     }
 
@@ -1255,7 +1267,8 @@ function renderBatchResults(results, totalSku) {
 function copyText(btn) {
   const content = btn.parentElement.nextElementSibling;
   if (!content) return;
-  const text = content.textContent;
+  // Strip HTML tags to get clean text for clipboard
+  const text = content.innerText || content.textContent || '';
   navigator.clipboard.writeText(text).then(() => {
     btn.textContent = '✅ 已複製';
     setTimeout(() => btn.textContent = '📋 複製', 2000);
@@ -1270,9 +1283,9 @@ function updateStats(checked, high, med, total) {
   document.getElementById('totalClean').textContent = total;
 }
 
+// Highlight violating keywords in RED in the original text
 function escapeHtml(text) {
   if (!text) return '';
-  // Escape HTML and preserve line breaks with <br>
   return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -1280,10 +1293,94 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
-
 function nl2br(text) {
   if (!text) return '';
   return escapeHtml(text).replace(/\n/g, '<br>');
+}
+function highlightViolations(text, issues) {
+  if (!text) return '';
+  // Process issues in reverse position order so spans don't shift indices
+  var sorted = (issues || []).slice().sort(function(a, b) {
+    return (b.position || 0) - (a.position || 0);
+  });
+  var result = escapeHtml(text);
+  for (var i = 0; i < sorted.length; i++) {
+    var issue = sorted[i];
+    var kw = issue.keyword.replace(/\*/g, '');
+    var escapedKw = escapeHtml(kw);
+    // Replace all occurrences with highlighted version (case-insensitive)
+    var regex = new RegExp(escapedKw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    result = result.replace(regex, function(match) {
+      return '<span class="v-highlight">' + match + '</span>';
+    });
+  }
+  return result.replace(/\n/g, '<br>');
+}
+
+// Smart rewrite: apply changes AND show changed parts in BLUE
+function generateSmartRewrite(text) {
+  if (!text) return { html: '', text: '' };
+  var result = text;
+  var allChanges = [];
+
+  // 1. Protect disclaimer sentences
+  var disclaimers = [];
+  result = result.replace(/(並不供作[^。]*?(?:診斷|治療|預防)[^。]*。)/gi, function(m) {
+    disclaimers.push(m);
+    return '%%D_' + (disclaimers.length - 1) + '%%';
+  });
+
+  // 2. Apply replacements and track changes
+  for (var r = 0; r < REPLACEMENTS.length; r++) {
+    var rule = REPLACEMENTS[r];
+    if (!rule.from) continue;
+    var regex;
+    try { regex = new RegExp(rule.from.replace(/\*/g, '.*?'), 'gi'); }
+    catch(e) { continue; }
+
+    var match;
+    var parts = [];
+    var lastEnd = 0;
+    regex.lastIndex = 0;
+    while ((match = regex.exec(result)) !== null) {
+      var matchedText = match[0];
+      parts.push(result.substring(lastEnd, match.index));
+      parts.push(rule.to);
+      allChanges.push({ from: matchedText, to: rule.to });
+      lastEnd = match.index + matchedText.length;
+    }
+    parts.push(result.substring(lastEnd));
+    result = parts.join('');
+  }
+
+  // 3. Restore disclaimers
+  for (var d = 0; d < disclaimers.length; d++) {
+    result = result.replace('%%D_' + d + '%%', disclaimers[d]);
+  }
+
+  // 4. Clean up spacing
+  result = result.split('\n').map(function(line) {
+    return line.replace(/\s{2,}/g, ' ').trim();
+  }).join('\n');
+
+  // 5. Build highlighted HTML — wrap ALL change targets in blue
+  var html = escapeHtml(result);
+  for (var c = 0; c < allChanges.length; c++) {
+    var ch = allChanges[c];
+    if (!ch.to) continue;
+    var escTo = escapeHtml(ch.to);
+    if (escTo) {
+      try {
+        var cr = new RegExp(escTo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        html = html.replace(cr, function(m) {
+          return '<span class="c-added">' + m + '</span>';
+        });
+      } catch(e) {}
+    }
+  }
+  html = html.replace(/\n/g, '<br>');
+
+  return { html: html, text: result };
 }
 
 // Build keyword table
