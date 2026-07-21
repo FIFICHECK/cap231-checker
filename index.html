@@ -71,8 +71,8 @@ header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
 .section-result .sr-status { font-size:12px; }
 .section-result .sr-body { padding:14px; }
 .rewrite-box { background:#f0fff4; border:2px solid #c6f6d5; border-radius:8px; padding:14px; margin-top:12px; }
-.rewrite-box .rb-label { font-size:11px; font-weight:600; color:#276749; margin-bottom:6px; }
-.rewrite-box .rb-content { background:white; border:1px solid #c6f6d5; border-radius:6px; padding:12px; font-size:13px; line-height:1.8; white-space:pre-wrap; word-break:break-word; }
+.preview-text { background:#f8f9fa; padding:12px; border-radius:6px; font-size:13px; line-height:2.0; margin:8px 0; max-height:300px; overflow-y:auto; word-break:break-word; }
+.rewrite-box .rb-content { background:white; border:1px solid #c6f6d5; border-radius:6px; padding:12px; font-size:13px; line-height:2.0; word-break:break-word; }
 .old-text { color:#e94560; }
 .new-text { color:#27ae60; }
 .tabs { display:flex; gap:0; margin-bottom:20px; background:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
@@ -88,8 +88,8 @@ header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
 .tag.red { background:#fee; color:#c0392b; }
 .tag.green { background:#efe; color:#27ae60; }
 .tag.amber { background:#fff8e1; color:#f39c12; }
-.preview-text { background:#f8f9fa; padding:12px; border-radius:6px; font-size:13px; line-height:1.8; margin:8px 0; max-height:300px; overflow-y:auto; white-space:pre-wrap; word-break:break-word; }
-.rules-panel { background:#f8f9fa; border-radius:8px; padding:16px; margin-top:12px; font-size:13px; }
+.preview-text { background:#f8f9fa; padding:12px; border-radius:6px; font-size:13px; line-height:2.0; margin:8px 0; max-height:300px; overflow-y:auto; word-break:break-word; }
+.rewrite-box .rb-content { background:white; border:1px solid #c6f6d5; border-radius:6px; padding:12px; font-size:13px; line-height:2.0; word-break:break-word; }
 .rules-panel table { width:100%; border-collapse:collapse; font-size:12px; }
 .rules-panel td,.rules-panel th { padding:5px 8px; border-bottom:1px solid #e0e0e0; text-align:left; }
 .rules-panel th { font-weight:600; color:#555; }
@@ -883,7 +883,7 @@ function renderResults(results, parsedData) {
 
     // Show original text
     if (r.text) {
-      html += `<div class="preview-text">${escapeHtml(r.text)}</div>`;
+      html += `<div class="preview-text">${nl2br(r.text)}</div>`;
     }
     // Violations — show in TEXT ORDER (original position), not grouped by risk level
     if (r.issues && r.issues.length > 0) {
@@ -905,7 +905,7 @@ function renderResults(results, parsedData) {
     if (rewritten !== r.text) {
       html += `<div class="rewrite-box">
         <div class="rb-label">✏️ 建議修改後內容 <button class="copy-btn" onclick="copyText(this)">📋 複製</button></div>
-        <div class="rb-content">${escapeHtml(rewritten)}</div>
+        <div class="rb-content">${nl2br(rewritten)}</div>
       </div>`;
     }
 
@@ -975,7 +975,7 @@ function renderBatchResults(results, totalSku) {
         <div class="v-detail">${escapeHtml(r.error)}</div>
         <div class="v-fix">建議使用上方「4 部份結構化檢查」手動輸入</div></div>`;
     } else {
-      if (r.text) html += `<div class="preview-text">${escapeHtml(r.text.substring(0,300))}</div>`;
+      if (r.text) html += `<div class="preview-text">${nl2br(r.text.substring(0,300))}</div>`;
       if (r.issues && r.issues.length>0) {
         r.issues.slice(0,8).forEach(i => html += renderIssue(i));
         if (r.issues.length>8) html += `<p style="color:#888;font-size:12px;">...仲有 ${r.issues.length-8} 項違規</p>`;
@@ -1010,9 +1010,18 @@ function updateStats(checked, high, med, total) {
 
 function escapeHtml(text) {
   if (!text) return '';
-  const d = document.createElement('div');
-  d.textContent = String(text);
-  return d.innerHTML;
+  // Escape HTML and preserve line breaks with <br>
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function nl2br(text) {
+  if (!text) return '';
+  return escapeHtml(text).replace(/\n/g, '<br>');
 }
 
 // Build keyword table
