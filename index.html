@@ -330,6 +330,8 @@ const CAP231_RULES = {
     '診斷':{risk:'high',section:'3(1)(b)',fix:'改用「判斷」「評估」'},
     '預防':{risk:'high',section:'3(1)(b)',fix:'改用「有助維持健康」'},
     '復發':{risk:'high',section:'3(1)(b)',fix:'移除'},
+    '醫學實證':{risk:'medium',section:'3(1)(b)',fix:'改用「研究顯示」「科研報告」'},
+    '醫學實証':{risk:'medium',section:'3(1)(b)',fix:'改用「研究顯示」「科研報告」'},
     '病情':{risk:'high',section:'3(1)(b)',fix:'改用「身體狀況」'},
     '症狀':{risk:'high',section:'3(1)(b)',fix:'改用「健康需要」'},
     '病患':{risk:'high',section:'3(1)(b)',fix:'移除'},
@@ -423,6 +425,8 @@ const REPLACEMENTS = [
   {from:'強效',to:''},  // remove 強效
   {from:'治療',to:'有助維持'},
   {from:'診斷',to:'判斷'},
+  {from:'醫學實證',to:'研究顯示'},
+  {from:'醫學實証',to:'研究顯示'},
   {from:'預防',to:'有助維持健康'},
   {from:'排毒',to:'支持身體自然淨化'},
   {from:'解毒',to:'支持身體自然代謝'},
