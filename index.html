@@ -455,16 +455,26 @@ function analyzeSection(text, sectionName) {
         const negationPatterns = [
           '並不供作', '不供作', '不應作', '不可作', '不適用於',
           '並非用作', '並不是用作', '不是用作', '不作為',
+          '非', // "非醫藥用品" — negation prefix
+          '並非', '並不是',
           '沒有根據', '未經', '不應被視為', '不能視為',
           '免責', '只供參考'
         ];
         let isDisclaimer = false;
         for (const neg of negationPatterns) {
           // Check if the keyword appears within a disclaimer sentence
-          const negRegex = new RegExp(neg + '.{0,30}' + keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'i');
+          // Use [\s\S] instead of . to match across newlines
+          const negRegex = new RegExp(neg.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '[\\s\\S]{0,40}' + keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'i');
           if (negRegex.test(text)) {
             isDisclaimer = true;
             break;
+          }
+        }
+        // Also check for keyword directly preceded by "非" (e.g., "非醫藥用品")
+        if (!isDisclaimer) {
+          const directNegRegex = new RegExp('非' + keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'i');
+          if (directNegRegex.test(text)) {
+            isDisclaimer = true;
           }
         }
         if (isDisclaimer) return; // skip this match — it's a legal disclaimer, not a claim
@@ -1307,9 +1317,15 @@ function generateSmartRewrite(text) {
   var result = text;
   var allChanges = [];
 
-  // 1. Protect disclaimer sentences
+  // 1. Protect legal disclaimer sentences from being rewritten
   var disclaimers = [];
+  // Full disclaimer sentences
   result = result.replace(/(並不供作[^。]*?(?:診斷|治療|預防)[^。]*。)/gi, function(m) {
+    disclaimers.push(m);
+    return '%%D_' + (disclaimers.length - 1) + '%%';
+  });
+  // "非xxx用品" patterns e.g. "非醫藥用品"
+  result = result.replace(/(非[^，。、]{1,20}用品)/gi, function(m) {
     disclaimers.push(m);
     return '%%D_' + (disclaimers.length - 1) + '%%';
   });
