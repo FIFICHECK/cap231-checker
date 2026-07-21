@@ -675,10 +675,19 @@ async function fetchAndParseProduct(sku) {
     let detailText = bodyText.substring(detailIdx);
 
     // Cut off at common page end markers
-    const endMarkers = ['商店條款', '送貨/退貨', '最近查看商品', '問問大家', 'HKTVmall派送貨品', 'Citi HKTVmall'];
+    const endMarkers = [
+      '商店條款', '送貨/退貨', '最近查看商品', '問問大家',
+      'HKTVmall派送貨品', 'Citi HKTVmall',
+      // Product page UI elements that are NOT part of description
+      '此貨品没有評論', '此貨品沒有評論',
+      '有圖片', '有回覆', '同店推介',
+      '經常一起買的貨品', '經常一起購買',
+      '進入商店', '香港網上社區藥房超市',
+      '最近查看', '共', '頁)', '頁 )',
+    ];
     for (const marker of endMarkers) {
       const mi = detailText.indexOf(marker);
-      if (mi > 0 && mi < 3000) {
+      if (mi > 0 && mi < 5000) {
         detailText = detailText.substring(0, mi);
         break;
       }
