@@ -683,8 +683,9 @@ async function fetchAndParseProduct(sku) {
     // These are HKTVmall page UI elements, NOT product description content
     const endPatterns = [
       '此貨品沒有評論', '此貨品没有評論', '全部用家評論', '全部評論',
+      '評論',  // standalone 評論 section heading
       '有圖片', '有回覆', '同店推介',
-      '經常一起買的貨品', '經常一起購買',
+      '經常一起買的貨品', '經常一起購買', '一起買',
       '進入商店', '香港網上社區藥房超市',
       '最近查看商品', '最近查看',
       '商店條款', '送貨/退貨', '問問大家',
@@ -702,7 +703,7 @@ async function fetchAndParseProduct(sku) {
     for (const pattern of endPatterns) {
       const pLower = pattern.toLowerCase();
       const mi = detailLower.indexOf(pLower);
-      if (mi > 100) {
+      if (mi > 50) {
         if (cutPos === -1 || mi < cutPos) cutPos = mi;
       }
     }
