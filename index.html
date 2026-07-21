@@ -268,23 +268,27 @@ footer a { color:#0f3460; }
 </div>
 
 <!-- ============= ABOUT TAB ============= -->
-<div class="tab-content" id="about-tab">
-  <div class="card">
-    <h2>ℹ️ 關於此工具 v2</h2>
-    <p style="font-size:14px;line-height:1.8;">
+<div id="about-section" style="background:#f8f9fa;border-radius:10px;padding:20px;margin:20px 0;">
+  <h2 style="margin:0 0 10px 0;">ℹ️ 關於此工具 v2</h2>
+  <p style="font-size:14px;line-height:1.8;margin:0;">
     <strong>Cap.231 不良廣告(醫藥)條例 Checker v2</strong><br><br>
-    <strong>新增功能：</strong><br>
+    <strong>功能：</strong><br>
+    • <strong>SKU Auto-Fetch</strong> — 輸入 SKU ID 自動擷取 HKTVmall 產品資料，拆解成 4 部份<br>
     • <strong>4 部份結構化檢查</strong> — 產品名稱、商品簡介、詳細介紹、補充文字分開分析<br>
-    • <strong>逐部份顯示違規</strong> — 清楚知道邊個部份有問題<br>
+    • <strong>🔴 原文違規紅色高亮</strong> — 違規關鍵字紅色標示<br>
+    • <strong>🔵 修改部份藍色高亮</strong> — 改寫建議中已修改部份藍色顯示<br>
     • <strong>完整改寫建議</strong> — 每部份都自動生成合規版本<br>
     • <strong>一鍵複製</strong> — copy 修改後嘅版本直接使用<br>
-    • 保留 v1 嘅 CSV upload、Batch SKU check、CORS proxy fetch<br><br>
-    <strong>注意：</strong>此工具僅供參考，唔構成法律意見。如有疑問請諮詢專業律師。
-    </p>
-  </div>
+    • <strong>Batch 批量檢查</strong> — 一次過 check 多個 SKU<br>
+    • <strong>Disclaimer 免責感知</strong> — 自動跳過「並不供作診斷」等合法免責條文<br>
+    • <strong>Hashtag 建議</strong> — 無 hashtag 時自動建議相關 tags<br><br>
+    <strong>⚠️ 注意：</strong>此工具僅供參考，唔構成法律意見。如有疑問請諮詢專業律師。
+  </p>
 </div>
 
-<footer><a href="https://fificheck.github.io">FIFICHECK</a> · Cap.231 Checker v2 · 僅供參考</footer>
+<footer style="text-align:center;padding:16px;color:#888;font-size:13px;">
+  <a href="https://fificheck.github.io">FIFICHECK</a> · Cap.231 Checker v2 · 僅供參考
+</footer>
 </div>
 
 <script>
