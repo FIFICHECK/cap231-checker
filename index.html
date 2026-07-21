@@ -484,6 +484,78 @@ function generateRewrite(text) {
 }
 
 // ==========================================
+// HASHTAG SUGGESTION ENGINE
+// ==========================================
+function suggestHashtags(productName, shortDesc, detailDesc) {
+  const allText = [productName, shortDesc, detailDesc].filter(Boolean).join(' ');
+  const tags = new Set();
+
+  // 1. Extract brand/product name keywords
+  const nameWords = allText.match(/[A-Za-z0-9]+/g) || [];
+  for (const w of nameWords) {
+    if (w.length >= 4 && w !== 'ESSENTIALE' && w !== 'EPL' && w !== 'MAT') {
+      // Skip common English words
+      if (!['LIVER', 'HEALTH', 'WITH', 'THIS', 'THAT', 'FROM', 'FOOD'].includes(w.toUpperCase())) {
+        tags.add('#' + w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+      }
+    }
+  }
+
+  // 2. Extract Chinese keywords from description
+  const zhPatterns = [
+    // Product type
+    { match: /護肝|健肝|肝臟健康|肝臟/g, tag: '#護肝' },
+    { match: /益生菌|益生元|乳酸菌/g, tag: '#益生菌' },
+    { match: /維他命|維生素/g, tag: '#維他命' },
+    { match: /蛋白/g, tag: '#蛋白質' },
+    { match: /膠原/g, tag: '#膠原蛋白' },
+    { match: /鈣/g, tag: '#補鈣' },
+    { match: /魚油|奧米加/g, tag: '#魚油' },
+    { match: /抗氧/g, tag: '#抗氧化' },
+    // Health concerns
+    { match: /捱夜|夜瞓|睡眠不足/g, tag: '#捱夜' },
+    { match: /飲酒|應酬|酒/g, tag: '#飲酒' },
+    { match: /吸煙|煙/g, tag: '#吸煙' },
+    { match: /疲勞|疲倦|精神/g, tag: '#紓解疲勞' },
+    { match: /排毒|解毒/g, tag: '#排毒' },
+    { match: /腸胃|消化/g, tag: '#腸胃健康' },
+    { match: /免疫力|免疫/g, tag: '#免疫力' },
+    { match: /新陳代謝/g, tag: '#新陳代謝' },
+    { match: /高糖|高脂|高脂肪/g, tag: '#高糖高脂' },
+    // Lifestyle
+    { match: /忙碌/g, tag: '#忙碌生活' },
+    { match: /保健品|健康食品/g, tag: '#保健品' },
+    // General
+    { match: /肝/g, tag: '#肝臟健康' },
+  ];
+
+  for (const p of zhPatterns) {
+    if (p.match.test(allText)) {
+      tags.add(p.tag);
+    }
+  }
+
+  // 3. If product name has Chinese keywords, extract them
+  const zhName = productName || '';
+  const zhNameKeywords = zhName.match(/[\u4e00-\u9fff]{2,4}/g) || [];
+  for (const kw of zhNameKeywords) {
+    // Add short product-relevant keywords as hashtags
+    if (['健肝','肝臟','護肝','保健','健康'].includes(kw)) {
+      tags.add('#' + kw);
+    }
+  }
+
+  // Sort tags: product-specific first, then general
+  const sorted = Array.from(tags).sort(function(a, b) {
+    // Prioritize longer/more specific tags
+    return b.length - a.length;
+  });
+
+  // Limit to 8 tags max
+  return sorted.slice(0, 8).join(' ');
+}
+
+// ==========================================
 // UI FUNCTIONS
 // ==========================================
 // Tab switching
@@ -1022,10 +1094,30 @@ function renderResults(results, parsedData) {
 
     // Rewrite suggestion
     const rewritten = generateRewrite(r.text);
-    if (rewritten !== r.text) {
+    const isHashtagSection = r.sectionName && r.sectionName.indexOf('Hashtag') >= 0;
+    var showRewrite = (rewritten !== r.text);
+
+    // For hashtag section: also suggest tags if empty or generateRewrite changed nothing
+    if (isHashtagSection && !showRewrite && r.text && r.text.trim().length < 3) {
+      showRewrite = true;
+    }
+
+    if (showRewrite) {
+      var rewriteContent = rewritten;
+      // For hashtag section with no content, suggest hashtags
+      if (isHashtagSection && (!rewriteContent || rewriteContent.trim().length < 3)) {
+        var suggested = suggestHashtags(
+          parsedData ? parsedData.skuName : '',
+          parsedData ? parsedData.shortDesc : '',
+          parsedData ? parsedData.detailDesc : ''
+        );
+        if (suggested) {
+          rewriteContent = suggested;
+        }
+      }
       html += `<div class="rewrite-box">
-        <div class="rb-label">✏️ 建議修改後內容 <button class="copy-btn" onclick="copyText(this)">📋 複製</button></div>
-        <div class="rb-content">${nl2br(rewritten)}</div>
+        <div class="rb-label">✏️ ${isHashtagSection && (!r.text || r.text.trim().length < 3) ? '建議 Hashtags（原產品無 hashtags）' : '建議修改後內容'} <button class="copy-btn" onclick="copyText(this)">📋 複製</button></div>
+        <div class="rb-content">${nl2br(rewriteContent)}</div>
       </div>`;
     }
 
