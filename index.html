@@ -1058,6 +1058,17 @@ async function fetchAndParseProduct(sku, lang) {
     result.shortDesc = shortRaw.trim();
   }
 
+  // For English, also try descriptionsTab content
+  if (lang === 'en' && (!result.shortDesc || result.shortDesc.length < 20)) {
+    var descTabMatch = html.match(/<div[^>]*id="descriptionsTab"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i);
+    if (descTabMatch) {
+      var descTabText = descTabMatch[0].replace(/<[^>]+>/g, '').trim();
+      if (descTabText.length > (result.shortDesc || '').length) {
+        result.shortDesc = descTabText.substring(0, 500);
+      }
+    }
+  }
+
   // Fallback: try meta tags if body text parsing gave nothing useful
   if (!result.shortDesc || result.shortDesc.length < 10) {
     const metaDesc = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i);
@@ -1075,7 +1086,10 @@ async function fetchAndParseProduct(sku, lang) {
 
   // 4. Find detailed description in the text
   // Skip tab navigation headings — find the REAL content section
-  const tabMarkers = ['詳細介紹', '商品詳情', '產品詳情'];
+  const isEnglish = lang === 'en';
+  const tabMarkers = isEnglish ? ['Description', 'Product Details', 'Details', 'Product Description'] : ['詳細介紹', '商品詳情', '產品詳情'];
+  const headingLabel = isEnglish ? 'Description' : '詳細介紹';
+  const headingCleanRegex = isEnglish ? new RegExp('^' + headingLabel + '[\\s:：]*', 'i') : /^詳細介紹[\s:：]*/;
   let detailIdx = -1;
   for (const marker of tabMarkers) {
     let pos = -1;
@@ -1096,15 +1110,19 @@ async function fetchAndParseProduct(sku, lang) {
     }
   }
   if (detailIdx >= 0) {
-    // Extract from "詳細介紹" onward
+    // Extract from the heading label onward
     let detailText = bodyText.substring(detailIdx);
-    // Strip the "詳細介紹" heading label itself
-    detailText = detailText.replace(/^詳細介紹[\s:：]*/, '').trim();
+    // Strip the heading label itself
+    detailText = detailText.replace(headingCleanRegex, '').trim();
 
     // Cut off at common page end markers (matched case-insensitively)
-    // These are HKTVmall page UI elements, NOT product description content
-    const endPatterns = [
-      '此貨品沒有評論', '此貨品没有評論', '全部用家評論', '全部評論',
+    const endPatterns = isEnglish ? [
+      'Customer Reviews', 'Reviews', 'Frequently Bought Together', 'Customers Also Viewed',
+      'Sold by', 'Delivery', 'Return Policy', 'About this item',
+      'Recently Viewed', 'Copyright', 'Disclaimer', 'Questions',
+      'Store Policy', 'Shipping', 'You May Also Like',
+      'Report', 'Q&A', 'Description', 'Specification',
+    ] : ['此貨品沒有評論', '此貨品没有評論', '全部用家評論', '全部評論',
       '評論',  // standalone 評論 section heading
       '有圖片', '有回覆', '同店推介',
       '經常一起買的貨品', '經常一起購買', '一起買',
@@ -1115,7 +1133,9 @@ async function fetchAndParseProduct(sku, lang) {
       '版權所有', '免責聲明',
     ];
     // Regex patterns for variable formatting
-    const endRegexPatterns = [
+    const endRegexPatterns = isEnglish ? [
+      /page\s*\d+\s*of\s*\d+/i, /reviews?\s*\(\s*\d+\s*\)/i,
+    ] : [
       /共\s*\d+\s*頁/i,      // "共 1 頁"
       /\(\s*\/\s*共\s*/i,    // "( / 共"
     ];
