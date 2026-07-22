@@ -888,8 +888,16 @@ async function autoCheckSKU() {
     <small>透過 CORS proxy Fetch HKTVmall 產品頁面</small>
   </div>`;
 
-  const parsed = await fetchAndParseProduct(sku);
-  if (parsed.error) {
+  // Fetch Chinese + English IN PARALLEL
+  var parsed = null, parsedEn = null;
+  var results = await Promise.allSettled([
+    fetchAndParseProduct(sku),
+    fetchAndParseProduct(sku, 'en')
+  ]);
+  if (results[0].status === 'fulfilled' && results[0].value && !results[0].value.error) {
+    parsed = results[0].value;
+  } else if (results[0].status === 'fulfilled' && results[0].value && results[0].value.error) {
+    // Chinese failed, show error
     document.getElementById('resultsContainer').innerHTML = `
       <div class="result-item expanded">
         <div class="result-header" style="cursor:default;">
@@ -901,7 +909,7 @@ async function autoCheckSKU() {
         <div class="result-body" style="display:block;">
           <div class="violation">
             <div class="v-title">⚠️ 無法自動擷取產品資料</div>
-            <div class="v-detail">${escapeHtml(parsed.error)}</div>
+            <div class="v-detail">${escapeHtml(results[0].value.error)}</div>
             <div class="v-fix">
               <strong>✏️ 解決方法：</strong><br>
               1. 稍後再試（CORS proxy 可能暫時不穩定）<br>
@@ -913,6 +921,9 @@ async function autoCheckSKU() {
       </div>`;
     updateStats(0,0,0,0);
     return;
+  }
+  if (results[1].status === 'fulfilled' && results[1].value && !results[1].value.error) {
+    parsedEn = results[1].value;
   }
 
   // Run analysis on each section — Chinese + English
