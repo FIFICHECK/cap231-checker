@@ -1188,15 +1188,35 @@ async function fetchAndParseProduct(sku) {
     }
   }
   // 6b. ALSO extract photo tab images (#photoTab / product-details-tab-img)
-  var photoTabHtml = html.match(/<div[^>]*(?:id="photoTab"|class="[^"]*product-details-tab-img[^"]*")[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i);
-  if (photoTabHtml) {
+  // Use simpler regex to capture the photo tab block regardless of div nesting depth
+  var photoTabMatch = html.match(/<div[^>]*class="[^"]*tab-wrapper[^"]*"[^>]*id="photoTab"[^>]*>[\s\S]*?<ul[\s\S]*?class="[^"]*product-details-tab-img[^"]*"[\s\S]*?<\/ul>/i);
+  if (!photoTabMatch) {
+    // Fallback: try id-only match
+    photoTabMatch = html.match(/<div[^>]*id="photoTab"[^>]*>[\s\S]*?<ul[\s\S]*?class="[^"]*product-details-tab-img[^"]*"[\s\S]*?<\/ul>/i);
+  }
+  if (photoTabMatch) {
     var tabImgRegex = /<img[\s\S]*?src\s*=\s*["']([^"']+\.(?:jpe?g|png|webp))["']/gi;
     var tiMatch;
-    while ((tiMatch = tabImgRegex.exec(photoTabHtml[0])) !== null) {
+    while ((tiMatch = tabImgRegex.exec(photoTabMatch[0])) !== null) {
       allImgMeta.push({src: tiMatch[1], alt: '產品相片', thumb: tiMatch[1]});
     }
   }
-  // 6c. Always set packageText (even if empty) so section always exists
+  // 6c. Fallback: if still no images found, try any uploadProductImage img on the page
+  if (allImgMeta.length === 0) {
+    var fallbackImgRegex = /<img[\s\S]*?src\s*=\s*["']([^"']*uploadProductImage\/[^"']+\.[a-z]+)["']/gi;
+    var fiMatch;
+    while ((fiMatch = fallbackImgRegex.exec(html)) !== null) {
+      // Deduplicate by src
+      var alreadyIn = false;
+      for (var fi = 0; fi < allImgMeta.length; fi++) {
+        if (allImgMeta[fi].src === fiMatch[1]) { alreadyIn = true; break; }
+      }
+      if (!alreadyIn) {
+        allImgMeta.push({src: fiMatch[1], alt: '產品圖片', thumb: fiMatch[1]});
+      }
+    }
+  }
+  // 6d. Always set packageText (even if empty) so section always exists
   if (imgAltTexts.length > 0) {
     result.packageText = [...new Set(imgAltTexts)].join(' ');
     result.packageImages = allImgMeta;
@@ -1449,8 +1469,8 @@ function renderResults(results, parsedData) {
     var isPackageSection = r.sectionName && r.sectionName.indexOf('Package') >= 0;
     var showRewrite = (smartRewrite.text !== r.text);
 
-    // For hashtag section: also suggest tags if empty
-    if (isHashtagSection && !showRewrite && r.text && r.text.trim().length < 3) {
+    // For hashtag section: also suggest tags if empty or no text
+    if (isHashtagSection && (!r.text || r.text.trim().length < 3)) {
       showRewrite = true;
     }
 
