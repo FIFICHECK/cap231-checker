@@ -168,7 +168,7 @@ footer a { color:#0f3460; }
     <div class="section-input">
       <div class="section-label"><span class="num">▶</span> 輸入 SKU ID，系統自動拆解成 4 部份進行分析</div>
       <div style="display:flex;gap:10px;">
-        <input type="text" id="skuAutoInput" style="flex:1;padding:14px 18px;font-size:16px;border:2px solid #0f3460;border-radius:8px;font-family:monospace;" placeholder="B0961005_S_4891609702053">
+        <input type="text" id="skuAutoInput" style="flex:1;padding:14px 18px;font-size:16px;border:2px solid #0f3460;border-radius:8px;font-family:monospace;" placeholder="H0888001_S_123456789">
         <button class="btn btn-primary" onclick="autoCheckSKU()" style="font-size:16px;padding:14px 28px;">🔍 自動檢查</button>
       </div>
     </div>
@@ -223,7 +223,7 @@ footer a { color:#0f3460; }
     <h2>📦 Batch 批量檢查</h2>
     <div class="section-input">
       <div class="section-label">SKU IDs（每行一個）</div>
-      <textarea id="batchSkuInput" rows="3" placeholder="B0961005_S_4891609702053&#10;B0961005_S_4901234567890"></textarea>
+      <textarea id="batchSkuInput" rows="3" placeholder="H0888001_S_123456789&#10;H0888001_S_987654321"></textarea>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
       <button class="btn btn-primary" onclick="batchCheckSKUs()">🔍 Batch 檢查</button>
