@@ -1318,8 +1318,8 @@ function cleanDescriptionText(text) {
   t = t.replace(/([^\n])((?:主要成份|成份|成分|建議用量|用量|用法|注意事項|警告|儲存方式|貯存|保存方法|適用人群|不適用人群|適合人士|適合|產地|來源|產品規格|規格|有效日期|保質期|原產地|製造商|進口商|代理商|一般保健服量|關注肝臟健康人士服量|肝臟脂肪偏高或肝功能欠佳人士服量|服量)[：:])/g, '$1\n$2');
   // Ensure numbered items like "1)", "2)", "3)" or "(1)" or "1." are on their own line
   t = t.replace(/([^\n])\s*(\d+\s*[\)）.])/g, '$1\n$2');
-  // Ensure each "- " bullet is on its own line
-  t = t.replace(/([^\n])\s*[-–•·]\s*/g, '$1\n- ');
+  // Ensure each "- " bullet is on its own line (but NOT inside words like "G-NiiB")
+  t = t.replace(/([^\na-zA-Z0-9\u4e00-\u9fff])\s*[-–•·]\s*/g, '$1\n- ');
   // Also handle " -" at start of line (already started newline)
   t = t.replace(/^[-–•·]\s*/gm, '- ');
   // Clean up duplicate newlines
