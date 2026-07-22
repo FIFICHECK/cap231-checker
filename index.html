@@ -649,7 +649,101 @@ function clearAll() {
 
 // MAIN CHECK — Manual 4-part input (fallback)
 // ==========================================
-// PACKAGE IMAGE OCR
+// PACKAGE IMAGE OCR — Auto-Fetch Images (triggered by button)
+// ==========================================
+async function runAutoOCROnImages() {
+  var images = window._autoOcrImages;
+  if (!images || images.length === 0) {
+    alert('冇圖片資料，請重新 Auto-Fetch');
+    return;
+  }
+
+  var statusEl = document.getElementById('autoOcrStatus');
+  if (!statusEl) {
+    alert('Status element not found, please re-run auto-fetch');
+    return;
+  }
+
+  // Load Tesseract
+  if (typeof Tesseract === 'undefined') {
+    statusEl.textContent = '🔍 正在載入 OCR 引擎（Tesseract.js + 中文）...';
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    document.head.appendChild(script);
+    await new Promise(function(resolve) {
+      script.onload = resolve;
+      setTimeout(resolve, 10000);
+    });
+  }
+
+  if (typeof Tesseract === 'undefined') {
+    statusEl.textContent = '❌ OCR 引擎載入失敗';
+    return;
+  }
+
+  var allResults = [];
+  var proxyBase = 'https://corsproxy.io/?url=';
+
+  for (var i = 0; i < images.length; i++) {
+    var imgMeta = images[i];
+    if (!imgMeta.src) continue;
+
+    statusEl.textContent = '📥 下載圖片 ' + (i+1) + '/' + images.length + '：' + imgMeta.src.split('/').pop().substring(0, 40);
+
+    try {
+      // Fetch image via CORS proxy
+      var proxyUrl = proxyBase + encodeURIComponent(imgMeta.src);
+      var resp = await fetch(proxyUrl);
+      var blob = await resp.blob();
+
+      // Create an Image element to draw on canvas
+      var imgEl = document.createElement('img');
+      var imgUrl = URL.createObjectURL(blob);
+      await new Promise(function(resolve, reject) {
+        imgEl.onload = resolve;
+        imgEl.onerror = reject;
+        imgEl.src = imgUrl;
+        // Timeout
+        setTimeout(reject, 15000);
+      });
+
+      statusEl.textContent = '📸 OCR ' + (i+1) + '/' + images.length + '：' + (imgMeta.alt || 'image ' + (i+1)).substring(0, 30) + '...';
+
+      var ocrResult = await Tesseract.recognize(imgEl, 'chi_sim+eng', {
+        logger: function(m) {
+          if (m.status === 'recognizing text') {
+            statusEl.textContent = '📸 OCR ' + (i+1) + '/' + images.length + '：' + Math.round(m.progress * 100) + '%';
+          }
+        }
+      });
+
+      URL.revokeObjectURL(imgUrl);
+      var text = (ocrResult.data.text || '').trim();
+      if (text) {
+        allResults.push('【' + (imgMeta.alt || 'Image ' + (i+1)).substring(0, 40) + '】\n' + text);
+      } else {
+        allResults.push('【' + (imgMeta.alt || 'Image ' + (i+1)).substring(0, 40) + '】\n（無法識別文字）');
+      }
+    } catch (err) {
+      allResults.push('【' + (imgMeta.alt || 'Image ' + (i+1)).substring(0, 40) + '】\n（圖片錯誤：' + (err.message || err).substring(0, 50) + '）');
+    }
+  }
+
+  // Store results and trigger check
+  window._ocrResults = allResults;
+  statusEl.textContent = '✅ OCR 完成！' + allResults.length + '/' + images.length + ' 張成功，自動重新檢查中...';
+
+  // Trigger auto-check again (re-fetch or re-render)
+  window._pendingOcrResults = allResults;
+  // Re-run the current SKU check
+  var skuInput = document.getElementById('skuAutoInput');
+  if (skuInput && skuInput.value.trim()) {
+    autoCheckSKU();
+  }
+}
+
+// ==========================================
+// PACKAGE IMAGE OCR — Manual Upload
 // ==========================================
 async function runPackageOCR() {
   const input = document.getElementById('inputPackageImages');
@@ -737,6 +831,22 @@ async function runPackageOCR() {
 }
 
 function checkManualProduct() {
+  // If package OCR images exist in window, include them in the package text
+  var packageTextFromOCR = '';
+  if (window._ocrResults && window._ocrResults.length > 0) {
+    var pkgInput = document.getElementById('inputPackageText');
+    if (pkgInput) {
+      var existing = pkgInput.value.trim();
+      var ocrCombined = window._ocrResults.join('\n\n');
+      if (existing) {
+        pkgInput.value = existing + '\n\n' + ocrCombined;
+      } else {
+        pkgInput.value = ocrCombined;
+      }
+      packageTextFromOCR = pkgInput.value;
+    }
+  }
+
   const sections = [
     {id:'inputSkuName', name:'SKU Name / 產品名稱'},
     {id:'inputShortDesc', name:'商品簡介 (Short Description)'},
@@ -1077,6 +1187,17 @@ async function fetchAndParseProduct(sku) {
     result.packageText = [...new Set(imgAltTexts)].join(' ');
     result.packageImages = allImgMeta;
   }
+  // If OCR results exist from a previous run, merge into packageText
+  if (window._pendingOcrResults && window._pendingOcrResults.length > 0) {
+    var ocrText = window._pendingOcrResults.join('\n\n');
+    if (result.packageText) {
+      result.packageText = result.packageText + '\n\n' + ocrText;
+    } else {
+      result.packageText = ocrText;
+    }
+    // Clear pending to avoid re-adding on subsequent calls
+    window._pendingOcrResults = [];
+  }
 
   // 7. Clean up — remove duplicated content between short and detail
   if (result.shortDesc && result.detailDesc) {
@@ -1287,7 +1408,10 @@ function renderResults(results, parsedData) {
 
     // Package section: show image metadata (what images were found)
     if (isPackageSection && parsedData && parsedData.packageImages && parsedData.packageImages.length > 0) {
-      html += '<details style="font-size:11px;color:#666;margin:6px 0;"><summary style="cursor:pointer;">📷 圖片來源（' + parsedData.packageImages.length + ' 張）— click 展開</summary><div style="max-height:200px;overflow-y:auto;margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;">';
+      html += '<details style="font-size:11px;color:#666;margin:6px 0;"><summary style="cursor:pointer;">📷 圖片來源（' + parsedData.packageImages.length + ' 張）— click 展開</summary>';
+      html += '<div style="margin-top:6px;"><button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="runAutoOCROnImages()">📸 OCR 全部圖片（擷取文字後重新檢查）</button></div>';
+      html += '<div id="autoOcrStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>';
+      html += '<div style="max-height:200px;overflow-y:auto;margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;">';
       for (var pi = 0; pi < parsedData.packageImages.length; pi++) {
         var meta = parsedData.packageImages[pi];
         html += '<div style="width:100px;text-align:center;">';
@@ -1297,6 +1421,8 @@ function renderResults(results, parsedData) {
         html += '<span style="font-size:10px;color:#999;">' + escapeHtml((meta.alt || '').substring(0, 30)) + '</span></div>';
       }
       html += '</div></details>';
+      // Store image URLs for OCR
+      html += '<script>window._autoOcrImages = ' + JSON.stringify(parsedData.packageImages) + ';</script>';
     }
 
     // Rewrite suggestion with BLUE highlighted changes
