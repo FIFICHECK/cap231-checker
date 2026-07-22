@@ -1043,14 +1043,20 @@ async function fetchAndParseProduct(sku) {
   }
 
   // 6. Extract image alt text from page HTML for package text checking
-  // Use [\\s\\S] to match across newlines in the HTML
-  const imgTagRegex = /<img[\\s\\S]*?alt\\s*=\\s*["']([^"']+)["'][\\s\\S]*?>/gi;
+  // Use [\s\S] to match across newlines in the HTML
+  const imgTagRegex = /<img[\s\S]*?alt\s*=\s*["']([^"']+)["'][\s\S]*?>/gi;
   const imgAltTexts = [];
+  var allImgMeta = []; // Store {src, alt} for display
   var imgMatch;
   while ((imgMatch = imgTagRegex.exec(html)) !== null) {
     var altText = imgMatch[1].trim();
+    // Also extract src from this tag
+    var srcInTag = '';
+    var srcInner = imgMatch[0].match(/src\s*=\s*["']([^"']+)["']/i);
+    if (srcInner) srcInTag = srcInner[1];
     if (altText.length > 3 && altText !== 'product image' && altText !== 'product' && !altText.match(/^https?:/)) {
       imgAltTexts.push(altText);
+      allImgMeta.push({src: srcInTag, alt: altText});
     }
   }
   // Also extract image filenames (src attribute) — product names often embedded
@@ -1069,6 +1075,7 @@ async function fetchAndParseProduct(sku) {
   }
   if (imgAltTexts.length > 0) {
     result.packageText = [...new Set(imgAltTexts)].join(' ');
+    result.packageImages = allImgMeta;
   }
 
   // 7. Clean up — remove duplicated content between short and detail
@@ -1212,14 +1219,15 @@ function renderResults(results, parsedData) {
   // Show what was parsed from the SKU fetch
   if (parsedData && parsedData.skuName) {
     html += `<div class="card" style="padding:14px;margin-bottom:16px;">
-      <div style="font-size:12px;color:#888;margin-bottom:6px;">📄 SKU 自動擷取結果 — 已拆解為 4 部份</div>
+      <div style="font-size:12px;color:#888;margin-bottom:6px;">📄 SKU 自動擷取結果 — 已拆解為 5 部份</div>
       <table class="summary-table">
         <tr><th style="width:140px;">部份</th><th>內容預覽</th><th style="width:60px;">字數</th><th style="width:60px;">🔴</th><th style="width:60px;">🟡</th></tr>`;
     const parts = [
       {key:'skuName', label:'1. 產品名稱'},
       {key:'shortDesc', label:'2. 商品簡介'},
       {key:'detailDesc', label:'3. 詳細介紹'},
-      {key:'extra', label:'4. Hashtags'}
+      {key:'extra', label:'4. Hashtags'},
+      {key:'packageText', label:'5. 包裝圖片文字'}
     ];
     parts.forEach((p, i) => {
       const text = parsedData[p.key] || '';
@@ -1277,10 +1285,25 @@ function renderResults(results, parsedData) {
       html += `<p style="text-align:center;padding:16px;color:#27ae60;">✅ 此部份未發現潛在違規</p>`;
     }
 
+    // Package section: show image metadata (what images were found)
+    if (isPackageSection && parsedData && parsedData.packageImages && parsedData.packageImages.length > 0) {
+      html += '<details style="font-size:11px;color:#666;margin:6px 0;"><summary style="cursor:pointer;">📷 圖片來源（' + parsedData.packageImages.length + ' 張）— click 展開</summary><div style="max-height:200px;overflow-y:auto;margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;">';
+      for (var pi = 0; pi < parsedData.packageImages.length; pi++) {
+        var meta = parsedData.packageImages[pi];
+        html += '<div style="width:100px;text-align:center;">';
+        if (meta.src) {
+          html += '<img src="' + escapeHtml(meta.src) + '" style="width:80px;height:60px;object-fit:contain;border:1px solid #ddd;border-radius:4px;" onerror="this.style.display=\'none\'"><br>';
+        }
+        html += '<span style="font-size:10px;color:#999;">' + escapeHtml((meta.alt || '').substring(0, 30)) + '</span></div>';
+      }
+      html += '</div></details>';
+    }
+
     // Rewrite suggestion with BLUE highlighted changes
     var rewritten = generateRewrite(r.text);
     var smartRewrite = generateSmartRewrite(r.text);
     var isHashtagSection = r.sectionName && r.sectionName.indexOf('Hashtag') >= 0;
+    var isPackageSection = r.sectionName && r.sectionName.indexOf('Package') >= 0;
     var showRewrite = (smartRewrite.text !== r.text);
 
     // For hashtag section: also suggest tags if empty
