@@ -920,7 +920,7 @@ async function autoCheckSKU() {
     { key:'skuName', name:'SKU Name / 產品名稱' },
     { key:'shortDesc', name:'商品簡介 (Short Description)' },
     { key:'detailDesc', name:'詳細介紹 (Detailed Description)' },
-    { key:'extra', name:'補充文字 / Hashtags' },
+    { key:'extra', name:'補充文字 / 標籤' },
     { key:'packageText', name:'包裝圖片文字 (Package Text)' }
   ];
   const sections = [];
@@ -1384,7 +1384,7 @@ function renderResults(results, parsedData) {
       {key:'skuName', label:'1. 產品名稱'},
       {key:'shortDesc', label:'2. 商品簡介'},
       {key:'detailDesc', label:'3. 詳細介紹'},
-      {key:'extra', label:'4. Hashtags'},
+      {key:'extra', label:'4. 標籤'},
       {key:'packageText', label:'5. 包裝圖片文字'}
     ];
     parts.forEach((p, i) => {
@@ -1491,7 +1491,7 @@ function renderResults(results, parsedData) {
       }
 
       var labelText = isHashtagSection && (!r.text || r.text.trim().length < 3)
-        ? '建議 Hashtags（原產品無 hashtags）'
+        ? '建議標籤（原產品無標籤）'
         : '建議修改後內容（<span style="color:#1a6bff;">藍色</span> = 已修改部份）';
       html += `<div class="rewrite-box">
         <div class="rb-label">✏️ ${labelText} <button class="copy-btn" onclick="copyText(this)">📋 複製</button></div>
