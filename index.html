@@ -1060,11 +1060,22 @@ async function fetchAndParseProduct(sku, lang) {
 
   // For English, also try descriptionsTab content
   if (lang === 'en' && (!result.shortDesc || result.shortDesc.length < 20)) {
-    var descTabMatch = html.match(/<div[^>]*id="descriptionsTab"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i);
-    if (descTabMatch) {
-      var descTabText = descTabMatch[0].replace(/<[^>]+>/g, '').trim();
-      if (descTabText.length > (result.shortDesc || '').length) {
-        result.shortDesc = descTabText.substring(0, 500);
+    // Priority 1: Extract from <tr class="productRemark"> / <span class="short-desc">
+    var productRemarkMatch = html.match(/<tr[^>]*class="[^"]*productRemark[^"]*"[^>]*>[\s\S]*?<span[^>]*class="[^"]*short-desc[^"]*"[\s\S]*?<\/span>[\s\S]*?<\/tr>/i);
+    if (productRemarkMatch) {
+      var remarkText = productRemarkMatch[0].replace(/<[^>]+>/g, '').trim();
+      if (remarkText.length > (result.shortDesc || '').length) {
+        result.shortDesc = remarkText.substring(0, 500);
+      }
+    }
+    // Priority 2: Extract from <div id="descriptionsTab">
+    if (!result.shortDesc || result.shortDesc.length < 20) {
+      var descTabMatch = html.match(/<div[^>]*id="descriptionsTab"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i);
+      if (descTabMatch) {
+        var descTabText = descTabMatch[0].replace(/<[^>]+>/g, '').trim();
+        if (descTabText.length > (result.shortDesc || '').length) {
+          result.shortDesc = descTabText.substring(0, 500);
+        }
       }
     }
   }
