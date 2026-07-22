@@ -1040,25 +1040,25 @@ async function fetchAndParseProduct(sku) {
   }
 
   // 6. Extract image alt text from page HTML for package text checking
-  const imgAltMatches = html.match(/<img[^>]+alt\s*=\s*["']([^"']+)["'][^>]*>/gi);
+  // Use [\\s\\S] to match across newlines in the HTML
+  const imgTagRegex = /<img[\\s\\S]*?alt\\s*=\\s*["']([^"']+)["'][\\s\\S]*?>/gi;
   const imgAltTexts = [];
-  if (imgAltMatches) {
-    for (var i = 0; i < imgAltMatches.length; i++) {
-      var altMatch = imgAltMatches[i].match(/alt\s*=\s*["']([^"']+)["']/i);
-      if (altMatch && altMatch[1].trim().length > 3) {
-        imgAltTexts.push(altMatch[1].trim());
-      }
+  var imgMatch;
+  while ((imgMatch = imgTagRegex.exec(html)) !== null) {
+    var altText = imgMatch[1].trim();
+    if (altText.length > 3 && altText !== 'product image' && altText !== 'product' && !altText.match(/^https?:/)) {
+      imgAltTexts.push(altText);
     }
   }
   // Also extract image filenames (src attribute) — product names often embedded
-  const imgSrcMatches = html.match(/<img[^>]+src\s*=\s*["']([^"']+\.(?:jpg|jpeg|png|webp))["']/gi);
-  if (imgSrcMatches) {
-    for (var j = 0; j < imgSrcMatches.length; j++) {
-      var srcMatch = imgSrcMatches[j].match(/src\s*=\s*["']([^"']+)["']/i);
-      if (srcMatch && srcMatch[1]) {
+  const imgSrcRegex = /<img[\s\S]*?src\s*=\s*["']([^"']+\.(?:jpg|jpeg|png|webp|gif))["']/gi;
+  if (imgSrcRegex) {
+    var srcImgMatch;
+    while ((srcImgMatch = imgSrcRegex.exec(html)) !== null) {
+      if (srcImgMatch[1]) {
         // Extract filename without extension
-        var fn = srcMatch[1].split('/').pop().replace(/\.(jpg|jpeg|png|webp).*/i, '');
-        if (fn.length > 3 && fn !== 'logo' && fn !== 'placeholder') {
+        var fn = srcImgMatch[1].split('/').pop().replace(/\.(jpg|jpeg|png|webp|gif).*/i, '');
+        if (fn.length > 3 && fn !== 'logo' && fn !== 'placeholder' && !fn.match(/^[\d]+$/)) {
           imgAltTexts.push(fn);
         }
       }
@@ -1078,9 +1078,9 @@ async function fetchAndParseProduct(sku) {
     }
   }
 
-  // Trim all
+  // Trim all — safely handle undefined keys
   for (const key of ['skuName','shortDesc','detailDesc','extra','packageText']) {
-    result[key] = result[key].trim();
+    result[key] = (result[key] || '').trim();
   }
 
   return result;
