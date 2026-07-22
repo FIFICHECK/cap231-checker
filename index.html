@@ -915,7 +915,7 @@ async function autoCheckSKU() {
     return;
   }
 
-  // Run analysis on each section
+  // Run analysis on each section — Chinese + English
   const sectionDefs = [
     { key:'skuName', name:'SKU Name / 產品名稱' },
     { key:'shortDesc', name:'商品簡介 (Short Description)' },
@@ -923,44 +923,40 @@ async function autoCheckSKU() {
     { key:'extra', name:'補充文字 / 標籤' },
     { key:'packageText', name:'包裝圖片文字 (Package Text)' }
   ];
-  const sections = [];
-  for (const def of sectionDefs) {
-    const text = parsed[def.key] || '';
-    if (text.trim() || def.key === 'extra' || def.key === 'packageText') {
-      // Always include hashtag & package sections (even empty — for suggestion/display)
-      // analyzeSection returns null for empty text, so handle that
-      if (text.trim()) {
-        const analysis = analyzeSection(text, def.name);
-        if (analysis) sections.push(analysis);
-      } else {
-        // Create a dummy result for empty sections so they appear in results
-        sections.push({
-          sectionName: def.name,
-          text: '',
-          totalIssues: 0,
-          highRisk: 0,
-          mediumRisk: 0,
-          lowRisk: 0,
-          issues: [],
-          matchedKeywords: []
-        });
+
+  function buildSections(data) {
+    const secs = [];
+    for (const def of sectionDefs) {
+      const text = (data && data[def.key]) || '';
+      if (text.trim() || def.key === 'extra' || def.key === 'packageText') {
+        if (text.trim()) {
+          const analysis = analyzeSection(text, def.name);
+          if (analysis) secs.push(analysis);
+        } else {
+          secs.push({ sectionName: def.name, text: '', totalIssues: 0, highRisk: 0, mediumRisk: 0, lowRisk: 0, issues: [], matchedKeywords: [] });
+        }
       }
     }
+    return secs;
   }
 
-  if (sections.length === 0) {
+  const sections = buildSections(parsed);
+  const sectionsEn = buildSections(parsedEn);
+
+  if (sections.length === 0 && sectionsEn.length === 0) {
     document.getElementById('resultsContainer').innerHTML = `<div class="card" style="text-align:center;color:#888;">無法從產品頁面提取文字內容</div>`;
     return;
   }
 
-  renderResults(sections, parsed);
+  renderResults(sections, parsed, sectionsEn);
 }
 
 // ==========================================
 // SMART FETCH + PARSE: HKTVmall → 4 Sections
 // ==========================================
-async function fetchAndParseProduct(sku) {
-  const url = `https://www.hktvmall.com/hktv/p/${sku}`;
+async function fetchAndParseProduct(sku, lang) {
+  const langPath = lang || '';
+  const url = langPath ? `https://www.hktvmall.com/hktv/${langPath}/p/${sku}` : `https://www.hktvmall.com/hktv/p/${sku}`;
   const proxies = [
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     `https://corsproxy.io/?${encodeURIComponent(url)}`,
@@ -1361,17 +1357,24 @@ function loadJsonFile(event) {
 // ==========================================
 // RENDER FUNCTIONS
 // ==========================================
-function renderResults(results, parsedData) {
+function renderResults(results, parsedData, resultsEn) {
   const container = document.getElementById('resultsContainer');
   let totalHigh=0, totalMed=0, totalLow=0;
   results.forEach(r => { totalHigh+=r.highRisk||0; totalMed+=r.mediumRisk||0; totalLow+=r.lowRisk||0; });
   updateStats(results.length, totalHigh, totalMed, results.length);
 
+  // Track English stats
+  let enHigh=0, enMed=0;
+  if (resultsEn && resultsEn.length) {
+    resultsEn.forEach(r => { enHigh+=r.highRisk||0; enMed+=r.mediumRisk||0; });
+  }
+
   let html = `<div class="legend-bar">
-    <span>✅ 完成 ${results.length}/4 個部份檢查</span>
+    <span>✅ 完成 ${results.length}/5 個部份檢查</span>
     <span><span class="dot" style="background:#e94560"></span>🔴 高風險: ${totalHigh}</span>
     <span><span class="dot" style="background:#f39c12"></span>🟡 中度: ${totalMed}</span>
     <span><span class="dot" style="background:#27ae60"></span>🟢 低風險: ${totalLow}</span>
+    ${resultsEn && resultsEn.length ? `<span style="margin-left:16px;padding-left:16px;border-left:2px solid #ddd;">🇬🇧 EN 🔴${enHigh} 🟡${enMed}</span>` : ''}
   </div>`;
 
   // Show what was parsed from the SKU fetch
@@ -1403,8 +1406,9 @@ function renderResults(results, parsedData) {
     });
     html += `</table></div>`;
   }
-
-  results.forEach((r, idx) => {
+  // Render each section side-by-side (Chinese + English)
+  results.forEach(function(r, idx) {
+    var rEn = resultsEn && resultsEn.length > idx ? resultsEn[idx] : null;
     const sectionId = 'sec_'+idx;
     const st = r.highRisk > 0 ? 'fail' : (r.mediumRisk > 0 ? 'warn' : 'pass');
     const stIcon = r.highRisk > 0 ? '🔴 不合規' : (r.mediumRisk > 0 ? '🟡 需留意' : '✅ 通過');
@@ -1422,8 +1426,10 @@ function renderResults(results, parsedData) {
           <span class="arrow">▼</span>
         </div>
       </div>
-      <div class="result-body">`;
+      <div class="result-body" style="display:flex;gap:12px;">`;
 
+    // Left column — Chinese
+    html += '<div style="flex:1;min-width:0;">';
     // Show original text with RED highlighted violations
     if (r.text) {
       html += `<div class="preview-text">${highlightViolations(r.text, r.issues)}</div>`;
@@ -1499,7 +1505,43 @@ function renderResults(results, parsedData) {
       </div>`;
     }
 
-    html += `</div></div>`; // close result-body, result-item
+    // Close Chinese column + open English column
+    html += '</div>';
+
+    // Right column — English (if available)
+    html += '<div style="flex:1;min-width:0;padding-left:12px;border-left:2px solid #eee;">';
+    if (rEn && rEn.text) {
+      html += '<div style="font-size:11px;color:#888;margin-bottom:4px;">🇬🇧 English</div>';
+      html += `<div class="preview-text">${highlightViolations(rEn.text, rEn.issues)}</div>`;
+    } else {
+      html += '<div style="font-size:12px;color:#ccc;text-align:center;padding:20px;">🇬🇧 No English data available</div>';
+    }
+    // English violations
+    if (rEn && rEn.issues && rEn.issues.length > 0) {
+      var sortedEn = rEn.issues.slice();
+      sortedEn.forEach(function(ii) {
+        if (ii.rule && ii.rule.section) ii._sectionSort = ii.rule.section;
+        if (ii.position !== undefined) ii._posSort = ii.position;
+      });
+      sortedEn.sort(function(a,b) { return (a._posSort||0) - (b._posSort||0); });
+      html += '<div style="margin-top:10px;"><strong>⚠️ ' + sortedEn.length + ' potential violations:</strong></div>';
+      sortedEn.forEach(function(i) {
+        const isLow = i.rule.risk === 'low';
+        html += renderIssue(i, isLow);
+      });
+    } else if (rEn) {
+      html += '<p style="text-align:center;padding:12px;color:#27ae60;margin-top:8px;">✅ No violations found</p>';
+    }
+    // English rewrite
+    if (rEn && rEn.text) {
+      var enRewrite = generateSmartRewrite(rEn.text);
+      if (enRewrite.text !== rEn.text && enRewrite.text) {
+        html += '<div class="rewrite-box" style="margin-top:12px;"><div class="rb-label">✏️ Suggested Fix <button class="copy-btn" onclick="copyText(this)">📋 Copy</button></div><div class="rb-content">' + (enRewrite.html) + '</div></div>';
+      }
+    }
+    html += '</div>'; // End English column
+
+    html += '</div>'; // End result-body
   });
 
   container.innerHTML = html;
