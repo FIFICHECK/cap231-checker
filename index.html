@@ -196,8 +196,14 @@ footer a { color:#0f3460; }
       <textarea id="inputExtra" class="section-textarea" rows="2" placeholder="#hashtags 或其他補充文字"></textarea>
     </div>
     <div class="section-input">
-      <div class="section-label"><span class="num">5</span> 包裝圖片文字 <span class="tag-sm">（手動輸入包裝／廣告圖上嘅文字作檢查，可選）</span></div>
-      <textarea id="inputPackageText" class="section-textarea" rows="3" placeholder="貼上產品包裝、廣告圖片上見到嘅文字..."></textarea>
+      <div class="section-label"><span class="num">5</span> 包裝圖片檢查 <span class="tag-sm">（Upload 圖片自動 OCR 讀取文字檢查）</span></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input type="file" id="inputPackageImages" accept="image/*" multiple style="flex:1;padding:10px;border:2px dashed #0f3460;border-radius:8px;background:#f8f9ff;">
+        <button class="btn btn-secondary" onclick="runPackageOCR()" style="white-space:nowrap;">📸 OCR 讀取 & 檢查</button>
+      </div>
+      <div id="packageOcrStatus" style="font-size:12px;color:#666;margin-top:6px;"></div>
+      <div id="packageImagePreview" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"></div>
+      <textarea id="inputPackageText" class="section-textarea" rows="2" placeholder="OCR 自動擷取嘅文字會出現係呢度，亦可以手動編輯/補充..." style="margin-top:8px;display:none;"></textarea>
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -642,6 +648,94 @@ function clearAll() {
 }
 
 // MAIN CHECK — Manual 4-part input (fallback)
+// ==========================================
+// PACKAGE IMAGE OCR
+// ==========================================
+async function runPackageOCR() {
+  const input = document.getElementById('inputPackageImages');
+  const files = input.files;
+  if (!files || files.length === 0) {
+    alert('請先選擇圖片檔案');
+    return;
+  }
+
+  const statusEl = document.getElementById('packageOcrStatus');
+  const previewEl = document.getElementById('packageImagePreview');
+  const textarea = document.getElementById('inputPackageText');
+  const btn = document.querySelector('[onclick="runPackageOCR()"]');
+
+  // Show previews
+  previewEl.innerHTML = '';
+  for (var p = 0; p < files.length; p++) {
+    (function(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:6px;border:2px solid #ddd;';
+        img.title = file.name;
+        previewEl.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    })(files[p]);
+  }
+
+  statusEl.textContent = '🔍 正在載入 OCR 引擎（Tesseract.js + 中文語言包，第一次會慢少少）...';
+  btn.disabled = true;
+
+  // Load Tesseract dynamically
+  if (typeof Tesseract === 'undefined') {
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    document.head.appendChild(script);
+    // Wait for load
+    await new Promise(function(resolve) {
+      script.onload = resolve;
+      // Timeout fallback — if CDN fails
+      setTimeout(resolve, 10000);
+    });
+  }
+
+  if (typeof Tesseract === 'undefined') {
+    statusEl.textContent = '❌ OCR 引擎載入失敗，請檢查網絡連線或改用「手動輸入文字」';
+    btn.disabled = false;
+    return;
+  }
+
+  var allText = [];
+  statusEl.textContent = '🔍 正在 OCR 讀取 ' + files.length + ' 張圖片...';
+
+  for (var i = 0; i < files.length; i++) {
+    statusEl.textContent = '📸 OCR 處理中 (' + (i + 1) + '/' + files.length + ')：' + files[i].name;
+    try {
+      var result = await Tesseract.recognize(files[i], 'chi_sim+eng', {
+        logger: function(m) {
+          if (m.status === 'recognizing text') {
+            statusEl.textContent = '📸 OCR ' + (i + 1) + '/' + files.length + '：' + Math.round(m.progress * 100) + '%';
+          }
+        }
+      });
+      var text = result.data.text.trim();
+      if (text) {
+        allText.push('【' + files[i].name + '】\n' + text);
+      } else {
+        allText.push('【' + files[i].name + '】\n（無法識別文字）');
+      }
+    } catch (err) {
+      allText.push('【' + files[i].name + '】\n（OCR 錯誤：' + err.message + '）');
+    }
+  }
+
+  var combined = allText.join('\n\n');
+  textarea.value = combined;
+  textarea.style.display = '';
+  statusEl.textContent = '✅ OCR 完成！共 ' + files.length + ' 張圖片，擷取文字如下。自動執行檢查中...';
+  btn.disabled = false;
+
+  // Auto-run check
+  checkManualProduct();
+}
+
 function checkManualProduct() {
   const sections = [
     {id:'inputSkuName', name:'SKU Name / 產品名稱'},
