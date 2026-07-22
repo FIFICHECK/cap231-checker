@@ -652,7 +652,9 @@ function clearAll() {
 // PACKAGE IMAGE OCR — Auto-Fetch Images (triggered by button)
 // ==========================================
 async function runAutoOCROnImages() {
-  var images = window._autoOcrImages;
+  // Read image data from hidden div instead of window (avoid HTML parser breakage)
+  var imgDataEl = document.getElementById('autoOcrData');
+  var images = imgDataEl ? JSON.parse(imgDataEl.dataset.images || '[]') : [];
   if (!images || images.length === 0) {
     alert('冇圖片資料，請重新 Auto-Fetch');
     return;
@@ -1421,8 +1423,8 @@ function renderResults(results, parsedData) {
         html += '<span style="font-size:10px;color:#999;">' + escapeHtml((meta.alt || '').substring(0, 30)) + '</span></div>';
       }
       html += '</div></details>';
-      // Store image URLs for OCR
-      html += '<script>window._autoOcrImages = ' + JSON.stringify(parsedData.packageImages) + ';</script>';
+      // Store image URLs for OCR (use hidden div instead of script tag to avoid HTML parser breakage)
+      html += '<div id="autoOcrData" style="display:none;" data-images=\'' + escapeHtml(JSON.stringify(parsedData.packageImages)) + '\'></div>';
     }
 
     // Rewrite suggestion with BLUE highlighted changes
