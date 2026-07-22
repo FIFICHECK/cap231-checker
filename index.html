@@ -748,9 +748,11 @@ function checkManualProduct() {
   const results = [];
   for (const s of sections) {
     const text = document.getElementById(s.id).value.trim();
-    if (!text) continue;
-    const analysis = analyzeSection(text, s.name);
-    if (analysis) results.push(analysis);
+    // Always include hashtag section (even empty — for suggestion engine)
+    if (text || s.id === 'inputExtra') {
+      const analysis = analyzeSection(text, s.name);
+      if (analysis) results.push(analysis);
+    }
   }
 
   if (results.length === 0) {
@@ -812,7 +814,8 @@ async function autoCheckSKU() {
   const sections = [];
   for (const def of sectionDefs) {
     const text = parsed[def.key] || '';
-    if (text.trim()) {
+    if (text.trim() || def.key === 'extra') {
+      // Always include hashtag section (even empty — for suggestion engine)
       const analysis = analyzeSection(text, def.name);
       if (analysis) sections.push(analysis);
     }
