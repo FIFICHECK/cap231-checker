@@ -1154,34 +1154,39 @@ async function fetchAndParseProduct(sku) {
     result.extra = hashtagMatches.join(' ');
   }
 
-  // 6. Extract image alt text from page HTML for package text checking
-  // Use [\s\S] to match across newlines in the HTML
-  const imgTagRegex = /<img[\s\S]*?alt\s*=\s*["']([^"']+)["'][\s\S]*?>/gi;
+  // 6. Extract product gallery images ONLY — look for data-primaryimagesrc attribute
+  // This narrows to just the product photo carousel, not page UI elements
+  const productImgRegex = /<img[\s\S]*?data-primaryimagesrc\s*=\s*["'][^"']+["'][\s\S]*?>/gi;
   const imgAltTexts = [];
-  var allImgMeta = []; // Store {src, alt} for display
-  var imgMatch;
-  while ((imgMatch = imgTagRegex.exec(html)) !== null) {
-    var altText = imgMatch[1].trim();
-    // Also extract src from this tag
-    var srcInTag = '';
-    var srcInner = imgMatch[0].match(/src\s*=\s*["']([^"']+)["']/i);
-    if (srcInner) srcInTag = srcInner[1];
-    if (altText.length > 3 && altText !== 'product image' && altText !== 'product' && !altText.match(/^https?:/)) {
+  var allImgMeta = [];
+  var productImgMatch;
+  while ((productImgMatch = productImgRegex.exec(html)) !== null) {
+    var tagHtml = productImgMatch[0];
+    // Extract src (thumbnail)
+    var srcInner = tagHtml.match(/src\s*=\s*["']([^"']+)["']/i);
+    var srcUrl = srcInner ? srcInner[1] : '';
+    // Extract alt text
+    var altInner = tagHtml.match(/alt\s*=\s*["']([^"']+)["']/i);
+    var altText = altInner ? altInner[1].trim() : '';
+    // Extract data-primaryimagesrc (full size image)
+    var primaryInner = tagHtml.match(/data-primaryimagesrc\s*=\s*["']([^"']+)["']/i);
+    var primaryUrl = primaryInner ? primaryInner[1] : '';
+    if (altText.length > 3 && altText !== 'product image' && altText !== 'product') {
       imgAltTexts.push(altText);
-      allImgMeta.push({src: srcInTag, alt: altText});
+      // Use the primary (full-size) URL for display when available
+      allImgMeta.push({src: primaryUrl || srcUrl, alt: altText, thumb: srcUrl});
     }
   }
-  // Also extract image filenames (src attribute) — product names often embedded
-  const imgSrcRegex = /<img[\s\S]*?src\s*=\s*["']([^"']+\.(?:jpg|jpeg|png|webp|gif))["']/gi;
-  if (imgSrcRegex) {
-    var srcImgMatch;
-    while ((srcImgMatch = imgSrcRegex.exec(html)) !== null) {
-      if (srcImgMatch[1]) {
-        // Extract filename without extension
-        var fn = srcImgMatch[1].split('/').pop().replace(/\.(jpg|jpeg|png|webp|gif).*/i, '');
-        if (fn.length > 3 && fn !== 'logo' && fn !== 'placeholder' && !fn.match(/^[\d]+$/)) {
-          imgAltTexts.push(fn);
-        }
+  // If no data-primaryimagesrc images found, fall back to any img with meaningful alt text on product pages
+  if (imgAltTexts.length === 0) {
+    var fallbackRegex = /<img[\s\S]*?alt\s*=\s*["']([^"']+)["'][\s\S]*?>/gi;
+    while ((productImgMatch = fallbackRegex.exec(html)) !== null) {
+      var altText2 = productImgMatch[1].trim();
+      var srcInner2 = productImgMatch[0].match(/src\s*=\s*["']([^"']+)["']/i);
+      var srcUrl2 = srcInner2 ? srcInner2[1] : '';
+      if (altText2.length > 5 && altText2 !== 'product image' && altText2 !== 'product' && !altText2.match(/^https?:/) && srcUrl2.match(/uploadProductImage/)) {
+        imgAltTexts.push(altText2);
+        allImgMeta.push({src: srcUrl2, alt: altText2});
       }
     }
   }
