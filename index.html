@@ -926,10 +926,25 @@ async function autoCheckSKU() {
   const sections = [];
   for (const def of sectionDefs) {
     const text = parsed[def.key] || '';
-    if (text.trim() || def.key === 'extra') {
-      // Always include hashtag section (even empty — for suggestion engine)
-      const analysis = analyzeSection(text, def.name);
-      if (analysis) sections.push(analysis);
+    if (text.trim() || def.key === 'extra' || def.key === 'packageText') {
+      // Always include hashtag & package sections (even empty — for suggestion/display)
+      // analyzeSection returns null for empty text, so handle that
+      if (text.trim()) {
+        const analysis = analyzeSection(text, def.name);
+        if (analysis) sections.push(analysis);
+      } else {
+        // Create a dummy result for empty sections so they appear in results
+        sections.push({
+          sectionName: def.name,
+          text: '',
+          totalIssues: 0,
+          highRisk: 0,
+          mediumRisk: 0,
+          lowRisk: 0,
+          issues: [],
+          matchedKeywords: []
+        });
+      }
     }
   }
 
@@ -1181,10 +1196,13 @@ async function fetchAndParseProduct(sku) {
       allImgMeta.push({src: tiMatch[1], alt: '產品相片', thumb: tiMatch[1]});
     }
   }
-  // 6c. If no images found, fallback to uploadProductImage path filter
+  // 6c. Always set packageText (even if empty) so section always exists
   if (imgAltTexts.length > 0) {
     result.packageText = [...new Set(imgAltTexts)].join(' ');
     result.packageImages = allImgMeta;
+  } else {
+    result.packageText = '';
+    result.packageImages = allImgMeta.length > 0 ? allImgMeta : [];
   }
   // If OCR results exist from a previous run, merge into packageText
   if (window._pendingOcrResults && window._pendingOcrResults.length > 0) {
