@@ -172,7 +172,7 @@ footer a { color:#0f3460; }
         <button class="btn btn-primary" onclick="autoCheckSKU()" style="font-size:16px;padding:14px 28px;">🔍 自動檢查</button>
       </div>
     </div>
-    <div class="input-hint">💡 系統會 Fetch HKTVmall 產品頁面 → 自動拆解成 產品名稱 / 商品簡介 / 詳細介紹 / Hashtags / 包裝圖片文字 → 逐部份分析 Cap.231 違規 → 每部份提供完整修改建議</div>
+    <div class="input-hint">💡 系統會 Fetch HKTVmall 產品頁面 → 自動拆解成 產品名稱 / 商品簡介 / 詳細介紹 / 標籤 / 包裝圖片文字 → 逐部份分析 Cap.231 違規 → 每部份提供完整修改建議</div>
   </div>
 
   <!-- Manual 4-part input — Fallback -->
@@ -192,8 +192,8 @@ footer a { color:#0f3460; }
       <textarea id="inputDetailDesc" rows="8" placeholder="貼上詳細介紹內容..."></textarea>
     </div>
     <div class="section-input">
-      <div class="section-label"><span class="num">4</span> 補充文字 <span class="tag-sm">（hashtags、備註等，可選）</span></div>
-      <textarea id="inputExtra" class="section-textarea" rows="2" placeholder="#hashtags 或其他補充文字"></textarea>
+      <div class="section-label"><span class="num">4</span> 補充文字 <span class="tag-sm">（標籤、備註等，可選）</span></div>
+      <textarea id="inputExtra" class="section-textarea" rows="2" placeholder="#標籤 或其他補充文字"></textarea>
     </div>
     <div class="section-input">
       <div class="section-label"><span class="num">5</span> 包裝圖片檢查 <span class="tag-sm">（Upload 圖片自動 OCR 讀取文字檢查）</span></div>
@@ -292,7 +292,7 @@ footer a { color:#0f3460; }
     • <strong>一鍵複製</strong> — copy 修改後嘅版本直接使用<br>
     • <strong>Batch 批量檢查</strong> — 一次過 check 多個 SKU<br>
     • <strong>Disclaimer 免責感知</strong> — 自動跳過「並不供作診斷」等合法免責條文<br>
-    • <strong>Hashtag 建議</strong> — 無 hashtag 時自動建議相關 tags<br><br>
+    • <strong>標籤建議</strong> — 無標籤時自動建議相關 tags<br><br>
     <strong>⚠️ 注意：</strong>此工具僅供參考，唔構成法律意見。如有疑問請諮詢專業律師。
     </p>
   </div>
@@ -853,7 +853,7 @@ function checkManualProduct() {
     {id:'inputSkuName', name:'SKU Name / 產品名稱'},
     {id:'inputShortDesc', name:'商品簡介 (Short Description)'},
     {id:'inputDetailDesc', name:'詳細介紹 (Detailed Description)'},
-    {id:'inputExtra', name:'補充文字 / Hashtags'},
+    {id:'inputExtra', name:'補充文字 / 標籤'},
     {id:'inputPackageText', name:'包裝圖片文字 (Package Text)'}
   ];
 
