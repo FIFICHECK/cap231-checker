@@ -447,6 +447,45 @@ const CAP231_RULES = {
     // 淫褻及不雅物品
     '淫褻':{risk:'high',section:'淫褻及不雅物品條例',fix:'絕對不可使用！'},
     '不雅':{risk:'high',section:'淫褻及不雅物品條例',fix:'注意避免不雅內容'},
+    // 電器產品(安全)規例 — Cap.406
+    'BS1363':{risk:'low',section:'電器產品安全',fix:'確認產品配備BS1363三腳插頭'},
+    'BS546':{risk:'low',section:'電器產品安全',fix:'確認產品配備BS546三腳插頭'},
+    '未經機電工程署認證':{risk:'high',section:'電器產品安全',fix:'安全證書必須為機電工程署認可核證團體發出'},
+    '未經EMSD認證':{risk:'high',section:'電器產品安全',fix:'安全證書必須為EMSD認可'},
+    '英規插腳已被封閉':{risk:'low',section:'旅行適配器',fix:'正確展示封閉英規插腳'},
+    'UK pin sealed':{risk:'low',section:'旅行適配器',fix:'正確展示封閉英規插腳'},
+    // 四電一腦 (WEEE)
+    '除舊服務':{risk:'low',section:'四電一腦',fix:'確認已備有環保署批註的除舊服務方案'},
+    '循環再造標籤':{risk:'low',section:'四電一腦',fix:'提供循環再造標籤予消費者'},
+    // 能源標籤 — Cap.598
+    '能源標籤':{risk:'low',section:'能源效益條例',fix:'確認產品附有符合規格能源標籤'},
+    'Energy Label':{risk:'low',section:'能源效益條例',fix:'確認產品附有符合規格能源標籤'},
+    '1級能源':{risk:'low',section:'能源效益條例',fix:'確認能源標籤級別正確展示'},
+    '2級能源':{risk:'low',section:'能源效益條例',fix:'確認能源標籤級別正確展示'},
+    '3級能源':{risk:'low',section:'能源效益條例',fix:'確認能源標籤級別正確展示'},
+    '4級能源':{risk:'low',section:'能源效益條例',fix:'確認能源標籤級別正確展示'},
+    '5級能源':{risk:'low',section:'能源效益條例',fix:'確認能源標籤級別正確展示'},
+    // 花灑頭警告字句
+    '花灑儲水式':{risk:'high',section:'電器產品安全',fix:'需附警告：切勿在「花灑儲水式」電熱水爐安裝設有開關水掣的花灑頭'},
+    '花灑頭':{risk:'medium',section:'電器產品安全',fix:'如設開關水掣，需附警告字句（中英對照）'},
+    'shower head.*on.off':{risk:'medium',section:'電器產品安全',fix:'Must include warning: Not to install shower heads with on/off valve for Shower Type storage electric water heaters'},
+    // 食物標籤
+    '此日期或之前食用':{risk:'low',section:'食物標籤',fix:'確認日期格式為(年/月/日)中英對照'},
+    'Use by':{risk:'low',section:'食物標籤',fix:'確認日期格式為(Y/M/D)中英對照'},
+    '此日期前最佳':{risk:'low',section:'食物標籤',fix:'確認日期格式為(年/月/日)中英對照'},
+    'Best Before':{risk:'low',section:'食物標籤',fix:'確認日期格式為(Y/M/D)中英對照'},
+    '營養標籤':{risk:'low',section:'食物標籤',fix:'確認7+1營養標籤：能量、蛋白質、總脂肪、飽和脂肪、反式脂肪、碳水化合物、糖、鈉'},
+    '致敏物':{risk:'low',section:'食物標籤',fix:'如有致敏物需附免責聲明'},
+    // 酒類飲品
+    '向未成年人售賣':{risk:'high',section:'酒類條例',fix:'必須展示法定警告：不得向18歲以下人士售賣酒類'},
+    'intoxicating liquor':{risk:'high',section:'酒類條例',fix:'Must display: Under the law of Hong Kong, intoxicating liquor must not be sold to a minor'},
+    // 迷你杯裝蒟蒻果凍
+    '蒟蒻果凍':{risk:'medium',section:'食物安全',fix:'確認高度或闊度不超過45毫米的迷你杯裝蒟蒻果凍已下架'},
+    '勿一口吞食':{risk:'low',section:'食物安全',fix:'確認已附法定警告字句（中英對照）'},
+    'Do not swallow whole':{risk:'low',section:'食物安全',fix:'確認已附法定警告字句'},
+    // 成人用品
+    '本產品含不雅內容':{risk:'medium',section:'成人用品',fix:'成人用品主圖須展示法定警告圖片'},
+    'This product contains indecent':{risk:'medium',section:'成人用品',fix:'成人用品主圖須展示法定警告圖片'},
   }
 };
 
