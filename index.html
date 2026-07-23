@@ -628,6 +628,11 @@ function analyzeSection(text, sectionName) {
   Object.keys(CAP231_RULES).forEach(category => {
     Object.entries(CAP231_RULES[category]).forEach(([keyword, rule]) => {
       let pattern = keyword.replace(/\*/g, '.*');
+      // Add word boundaries for short alphabetic keywords to avoid false positives
+      // e.g. 'THC' should not match inside 'healthcare', 'CBD' inside 'abcde'
+      if (/^[a-zA-Z]{2,6}$/.test(pattern)) {
+        pattern = '\\b' + pattern + '\\b';
+      }
       let regex;
       try { regex = new RegExp(pattern, 'gi'); }
       catch(e) { regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi'); }
