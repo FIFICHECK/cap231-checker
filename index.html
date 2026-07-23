@@ -536,6 +536,35 @@ const CAP231_RULES = {
     'DMAA':{risk:'high',section:'藥劑製品分類(附錄5)',fix:'1,3-二甲基戊胺(含DMAA)屬受管制藥劑製品'},
     '洛伐他汀':{risk:'high',section:'藥劑製品分類(附錄5)',fix:'含Lovastatin產品歸類為藥劑製品'},
     'Lovastatin':{risk:'high',section:'藥劑製品分類(附錄5)',fix:'含Lovastatin產品歸類為藥劑製品'},
+    // 玩具及兒童產品安全條例 — Cap.424
+    '玩具安全標準':{risk:'low',section:'玩具安全條例(Cap.424)',fix:'玩具須符合Cap.424附件1列明其中一套安全標準'},
+    'CE標誌':{risk:'low',section:'玩具安全條例(Cap.424)',fix:'確認玩具符合EU安全標準'},
+    'ASTM':{risk:'low',section:'玩具安全條例(Cap.424)',fix:'確認玩具符合美國ASTM安全標準'},
+    'EN71':{risk:'low',section:'玩具安全條例(Cap.424)',fix:'確認玩具符合EU EN71安全標準'},
+    'ISO8124':{risk:'low',section:'玩具安全條例(Cap.424)',fix:'確認玩具符合ISO 8124國際安全標準'},
+    // 淫褻及不雅物品 — 警告字句
+    'WARNING.*THIS ARTICLE CONTAINS':{risk:'medium',section:'淫褻及不雅物品條例(Cap.390)',fix:'不雅物品須展示法定警告字句（中英對照）'},
+    '本物品內容可能令人反感':{risk:'low',section:'淫褻及不雅物品條例(Cap.390)',fix:'已展示Cap.390法定警告字句'},
+    '不可將本物品派發.*18':{risk:'low',section:'淫褻及不雅物品條例(Cap.390)',fix:'已展示Cap.390法定年齡限制警告'},
+    // 禁止售賣
+    '口服避孕藥':{risk:'high',section:'禁止售賣列表',fix:'口服避孕藥不可於HKTVmall平台售賣'},
+    '避孕藥':{risk:'high',section:'禁止售賣列表',fix:'避孕藥不可於HKTVmall平台售賣（需醫生處方）'},
+    '止痛退燒':{risk:'high',section:'禁止售賣列表',fix:'含止痛退燒藥物成分產品不可售賣'},
+    '大麻二酚':{risk:'high',section:'禁止售賣列表',fix:'含CBD產品已禁止售賣'},
+    'CBD':{risk:'high',section:'禁止售賣列表',fix:'含CBD產品已禁止售賣（2025年更新）'},
+    // 即棄塑膠產品禁令
+    '即棄塑膠':{risk:'medium',section:'即棄塑膠產品禁令',fix:'確認產品是否屬即棄塑膠管制範圍'},
+    '即棄膠餐具':{risk:'medium',section:'即棄塑膠產品禁令',fix:'即棄膠餐具已受管制'},
+    '即棄膠飲管':{risk:'medium',section:'即棄塑膠產品禁令',fix:'即棄膠飲管已受管制'},
+    '發泡膠':{risk:'medium',section:'即棄塑膠產品禁令',fix:'發泡膠產品已受管制'},
+    '微塑膠':{risk:'medium',section:'即棄塑膠產品禁令',fix:'含微塑膠產品需留意管制要求'},
+    // 商品最少食用及保存期限
+    '此日期或之前食用':{risk:'low',section:'食物標籤',fix:'確認日期格式為(年/月/日)中英對照'},
+    'Use by':{risk:'low',section:'食物標籤',fix:'確認日期格式為(Y/M/D)中英對照'},
+    '此日期前最佳':{risk:'low',section:'食物標籤',fix:'確認日期格式為(年/月/日)中英對照'},
+    'Best Before':{risk:'low',section:'食物標籤',fix:'確認日期格式為(Y/M/D)中英對照'},
+    '食用期限不足30日':{risk:'medium',section:'食物標籤',fix:'食用期限不足30日不可上架'},
+    '保存期限不足30日':{risk:'medium',section:'食物標籤',fix:'保存期限不足30日不可上架'},
   }
 };
 
