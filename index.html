@@ -565,6 +565,29 @@ const CAP231_RULES = {
     'Best Before':{risk:'low',section:'食物標籤',fix:'確認日期格式為(Y/M/D)中英對照'},
     '食用期限不足30日':{risk:'medium',section:'食物標籤',fix:'食用期限不足30日不可上架'},
     '保存期限不足30日':{risk:'medium',section:'食物標籤',fix:'保存期限不足30日不可上架'},
+    // 冷凍/冷藏食品 — 食環署附錄2
+    '冷凍食品':{risk:'medium',section:'受限制食物',fix:'冷凍食品需持有食環署受限制食物售賣許可證'},
+    '冷藏食品':{risk:'medium',section:'受限制食物',fix:'冷藏食品需持有食環署受限制食物售賣許可證'},
+    '刺身':{risk:'medium',section:'受限制食物',fix:'預先包裝刺身需持有受限制食物售賣許可證'},
+    // 朱古力夏季下架安排
+    '朱古力':{risk:'low',section:'夏季下架安排',fix:'朱古力產品5月1日至9月30日期間不可上架（標準集運）'},
+    '巧克力':{risk:'low',section:'夏季下架安排',fix:'巧克力產品5月1日至9月30日期間不可上架（標準集運）'},
+    // SKU ID重用
+    'SKU ID':{risk:'low',section:'SKU重用罰款',fix:'重用SKU ID可被罰款港幣$10,000'},
+    // 保健/美容保證金
+    '保健保證金':{risk:'low',section:'HKTVmall政策',fix:'保健/美容類別需繳付港幣$50,000保證金'},
+    // 重用罰款
+    '罰款.*10000':{risk:'low',section:'HKTVmall政策',fix:'重用SKU ID罰款港幣$10,000'},
+    // 食物標籤 — 7+1營養標籤
+    '能量.*千卡':{risk:'low',section:'營養標籤',fix:'確認營養標籤以千卡或千焦標示能量'},
+    '蛋白質.*克':{risk:'low',section:'營養標籤',fix:'確認營養標籤包含蛋白質'},
+    '總脂肪.*克':{risk:'low',section:'營養標籤',fix:'確認營養標籤包含總脂肪'},
+    '飽和脂肪':{risk:'low',section:'營養標籤',fix:'確認營養標籤包含飽和脂肪'},
+    '反式脂肪':{risk:'low',section:'營養標籤',fix:'確認營養標籤包含反式脂肪'},
+    '碳水化合物':{risk:'low',section:'營養標籤',fix:'確認營養標籤包含碳水化合物'},
+    '糖.*克':{risk:'low',section:'營養標籤',fix:'確認營養標籤包含糖'},
+    '鈉.*毫克':{risk:'low',section:'營養標籤',fix:'確認營養標籤包含鈉'},
+    '膳食纖維':{risk:'low',section:'營養標籤',fix:'如標示總碳水化合物須同時標示膳食纖維'},
   }
 };
 
