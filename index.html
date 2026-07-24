@@ -1939,8 +1939,9 @@ function renderResults(results, parsedData, resultsEn) {
       html += '<p style="text-align:center;padding:12px;color:#27ae60;margin-top:8px;">✅ No violations found</p>';
     }
     // English rewrite — skip for package text (no English version)
-    if (!isPackageSection && rEn && rEn.text) {
-      var enRewrite = generateSmartRewrite(rEn.text);
+    // For tag section: always show suggestions even if rEn.text is empty
+    if (!isPackageSection && (isHashtagSection || (rEn && rEn.text))) {
+      var enRewrite = rEn && rEn.text ? generateSmartRewrite(rEn.text) : { text: '', html: '' };
       // For English tag section: ALWAYS show translated Chinese tag suggestions
       if (isHashtagSection) {
         // Get Chinese suggestions, then translate to English
