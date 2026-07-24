@@ -1643,7 +1643,34 @@ async function fetchAndParseProduct(sku, lang) {
       }
     }
   }
-  // 6e. Fallback: og:image meta tag (SEO/social share — always in SSR)
+  // 6e. Fallback: product data JSON array "imageUrls":["...","..."]
+  if (allImgMeta.length === 0) {
+    var imgUrlsMatch = html.match(/"imageUrls"\s*:\s*\[([^\]]+)\]/i);
+    if (imgUrlsMatch) {
+      var imgUrls = imgUrlsMatch[1].match(/"https:\/\/[^"']+(?:uploadProductImage|hktv-mms)[^"']+"/gi);
+      if (imgUrls) {
+        // Deduplicate by normalizing URLs (e.g. pick _1200.jpg variants)
+        var seen = {};
+        for (var iu = 0; iu < imgUrls.length; iu++) {
+          var imgUrl = imgUrls[iu].replace(/^"|"$/g, '');
+          // Prefer larger images (1200 > 515 > 300 > 96)
+          var baseKey = imgUrl.replace(/_\d+\.jpg$/, '');
+          if (!seen[baseKey]) {
+            seen[baseKey] = imgUrl;
+          } else {
+            // Keep the larger version
+            var existingSize = parseInt((seen[baseKey].match(/_(\d+)\.jpg$/) || ['_0','0'])[1] || '0');
+            var newSize = parseInt((imgUrl.match(/_(\d+)\.jpg$/) || ['_0','0'])[1] || '0');
+            if (newSize > existingSize) seen[baseKey] = imgUrl;
+          }
+        }
+        for (var key in seen) {
+          allImgMeta.push({src: seen[key], alt: '產品圖片 (JSON data)', thumb: seen[key]});
+        }
+      }
+    }
+  }
+  // 6f. Fallback: og:image meta tag (SEO/social share — always in SSR)
   if (allImgMeta.length === 0) {
     var ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i);
     if (ogMatch && ogMatch[1].length > 20) {
