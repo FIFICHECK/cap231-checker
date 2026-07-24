@@ -967,7 +967,7 @@ async function runAutoOCROnImages() {
   var imgDataEl = document.getElementById('autoOcrData');
   var images = imgDataEl ? JSON.parse(imgDataEl.dataset.images || '[]') : [];
   if (!images || images.length === 0) {
-    alert('冇圖片資料，請重新 Auto-Fetch');
+    if (statusEl) statusEl.textContent = '⚠️ 產品頁面無圖片可供 OCR（未找到 product carousel / photo tab 圖片）';
     return;
   }
 
@@ -1627,7 +1627,21 @@ async function fetchAndParseProduct(sku, lang) {
       }
     }
   }
-  // 6d. Always set packageText (even if empty) so section always exists
+  // 6d. Ultra fallback: any product image with reasonable src from the whole page
+  if (allImgMeta.length === 0) {
+    var anyImgRegex = /<img[^>]*?src\s*=\s*["'](https:\/\/[^"']*\/[^"']*product[^"']*\.[a-z]+)["']/gi;
+    var aiMatch;
+    while ((aiMatch = anyImgRegex.exec(html)) !== null) {
+      var already = false;
+      for (var ai = 0; ai < allImgMeta.length; ai++) {
+        if (allImgMeta[ai].src === aiMatch[1]) { already = true; break; }
+      }
+      if (!already && aiMatch[1].length > 30) {
+        allImgMeta.push({src: aiMatch[1], alt: '產品圖片', thumb: aiMatch[1]});
+      }
+    }
+  }
+  // 6e. Always set packageText (even if empty) so section always exists
   if (imgAltTexts.length > 0) {
     result.packageText = [...new Set(imgAltTexts)].join(' ');
     result.packageImages = allImgMeta;
