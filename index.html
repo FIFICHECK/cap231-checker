@@ -165,7 +165,7 @@ footer a { color:#0f3460; }
 <!-- ============= SECTION 1: INPUT ============= -->
 <div id="section-input">
   <div class="card">
-    <h2>🔍 4 部份結構化檢查</h2>
+    <h2>🔍 5 部份結構化檢查</h2>
     <div class="legend-bar">
       <span><span class="dot" style="background:#e94560"></span>🔴 高風險（可能違規）</span>
       <span><span class="dot" style="background:#f39c12"></span>🟡 中度風險（需留意）</span>
@@ -176,7 +176,7 @@ footer a { color:#0f3460; }
   <div class="card" style="background:linear-gradient(135deg,#f0f4ff,white);border:2px solid #0f3460;">
     <h2>🚀 SKU 自動擷取 — 首選模式</h2>
     <div class="section-input">
-      <div class="section-label"><span class="num">▶</span> 輸入 SKU ID，系統自動拆解成 4 部份進行分析</div>
+      <div class="section-label"><span class="num">▶</span> 輸入 SKU ID，系統自動拆解成 5 部份進行分析</div>
       <div style="display:flex;gap:10px;">
         <input type="text" id="skuAutoInput" style="flex:1;padding:14px 18px;font-size:16px;border:2px solid #0f3460;border-radius:8px;font-family:monospace;" placeholder="H0888001_S_123456789">
         <button class="btn btn-primary" onclick="autoCheckSKU()" style="font-size:16px;padding:14px 28px;">🔍 自動檢查</button>
@@ -187,7 +187,7 @@ footer a { color:#0f3460; }
 
   <!-- Manual 4-part input — Fallback -->
   <div class="card">
-    <h2>✏️ 或手動輸入（4 部份） <span style="font-size:12px;font-weight:400;color:#888;">用作 Fallback 或預先編輯內容</span></h2>
+    <h2>✏️ 或手動輸入（5 部份） <span style="font-size:12px;font-weight:400;color:#888;">用作 Fallback 或預先編輯內容</span></h2>
 
     <div class="section-input">
       <div class="section-label"><span class="num">1</span> 產品名稱 / SKU Name</div>
@@ -294,8 +294,8 @@ footer a { color:#0f3460; }
     <p style="font-size:14px;line-height:1.8;">
     <strong>HKTVmall 平台產品 Checker Dashboard</strong><br><br>
     <strong>功能：</strong><br>
-    • <strong>SKU Auto-Fetch</strong> — 輸入 SKU ID 自動擷取 HKTVmall 產品資料，拆解成 4 部份<br>
-    • <strong>4 部份結構化檢查</strong> — 產品名稱、商品簡介、詳細介紹、補充文字分開分析<br>
+    • <strong>SKU Auto-Fetch</strong> — 輸入 SKU ID 自動擷取 HKTVmall 產品資料，拆解成 5 部份<br>
+    • <strong>5 部份結構化檢查</strong> — 產品名稱、商品簡介、詳細介紹、補充文字分開分析<br>
     • <strong>🔴 原文違規紅色高亮</strong> — 違規關鍵字紅色標示<br>
     • <strong>🔵 修改部份藍色高亮</strong> — 改寫建議中已修改部份藍色顯示<br>
     • <strong>完整改寫建議</strong> — 每部份都自動生成合規版本<br>
@@ -1128,7 +1128,7 @@ async function autoCheckSKU() {
             <div class="v-fix">
               <strong>✏️ 解決方法：</strong><br>
               1. 稍後再試（CORS proxy 可能暫時不穩定）<br>
-              2. 使用下方「✏️ 或手動輸入（4 部份）」模式，自行貼上產品資料<br>
+              2. 使用下方「✏️ 或手動輸入（5 部份）」模式，自行貼上產品資料<br>
               3. 或者直接喺瀏覽器打開 <a href="https://www.hktvmall.com/hktv/p/${escapeHtml(sku)}" target="_blank">產品頁面</a> 複製文字貼上
             </div>
           </div>
@@ -1896,7 +1896,7 @@ function renderBatchResults(results, totalSku) {
     if (r.error) {
       html += `<div class="violation"><div class="v-title">⚠️ 無法擷取</div>
         <div class="v-detail">${escapeHtml(r.error)}</div>
-        <div class="v-fix">建議使用上方「4 部份結構化檢查」手動輸入</div></div>`;
+        <div class="v-fix">建議使用上方「5 部份結構化檢查」手動輸入</div></div>`;
     } else {
       if (r.text) html += `<div class="preview-text">${nl2br(r.text.substring(0,300))}</div>`;
       if (r.issues && r.issues.length>0) {
