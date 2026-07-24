@@ -92,6 +92,8 @@ header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
 .loading-dots::after { content:''; animation:dots 1.5s steps(4,end) infinite; }
 @keyframes dots { 0% { content:''; } 25% { content:'.'; } 50% { content:'..'; } 75% { content:'...'; } 100% { content:''; } }
 @keyframes spin { to { transform:rotate(360deg); } }
+.disclaimer-blink { color:#d32f2f; font-weight:600; animation:blinkWarning 1.5s ease-in-out infinite; display:inline; }
+@keyframes blinkWarning { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
 .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; margin:2px; }
 .tag.red { background:#fee; color:#c0392b; }
 .tag.green { background:#efe; color:#27ae60; }
@@ -301,7 +303,7 @@ footer a { color:#0f3460; }
     • <strong>Batch 批量檢查</strong> — 一次過 check 多個 SKU<br>
     • <strong>Disclaimer 免責感知</strong> — 自動跳過「並不供作診斷」等合法免責條文<br>
     • <strong>標籤建議</strong> — 無標籤時自動建議相關 tags<br><br>
-    <strong>⚠️ 注意：</strong>此工具僅供參考，唔構成法律意見 或 代表HKTVmall QA 立場，網頁意見只作為參考性質，一切以QA為准。如有疑問請諮詢MCS 表格 或 QA 部門查詢。<br><br>
+    <strong>⚠️ 注意：</strong><span class="disclaimer-blink">此工具僅供參考，唔構成法律意見 或 代表HKTVmall QA 立場，網頁意見只作為參考性質，一切以QA為准。如有疑問請諮詢MCS 表格 或 QA 部門查詢。</span><br><br>
     📎 <strong>QA 參考資料：</strong><a href="https://sites.google.com/view/hktv-merc-faq/%E7%AC%AC%E4%B8%80%E9%9A%8E%E6%AE%B5/excellence-in-sales-practice" target="_blank">HKTVmall QA 上載貨品指引</a><br>
     📎 <strong>MCS Form (QA指引 查詢)：</strong><a href="https://academy.hktvmall.com/merc-enquiry" target="_blank">https://academy.hktvmall.com/merc-enquiry</a><br>
     📎 <strong>Email：</strong><a href="mailto:qa-support@hktvmall.com">qa-support@hktvmall.com</a> (HKTV Quality Assurance Team)
