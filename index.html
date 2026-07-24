@@ -837,6 +837,66 @@ function suggestHashtags(productName, shortDesc, detailDesc) {
   return sorted.slice(0, 8).join(' ');
 }
 
+// English-only hashtag suggestion from English product text
+function suggestEnglishHashtags(productName, shortDesc, detailDesc) {
+  const allText = [productName, shortDesc, detailDesc].filter(Boolean).join(' ');
+  if (!allText.trim()) return '';
+  const lowerText = allText.toLowerCase();
+  const tags = new Set();
+
+  // English keyword patterns for health/product categories
+  const enPatterns = [
+    // Health concerns
+    { match: /liver|hepatic|fatty\s*liver/gi, tag: '#LiverHealth' },
+    { match: /memory|cognitive|cognition|brain/gi, tag: '#BrainHealth' },
+    { match: /immun(e|ity)|defense/gi, tag: '#Immunity' },
+    { match: /digestion|digestive|gut|probiotic/gi, tag: '#GutHealth' },
+    { match: /joint|bone|cartilage|glucosamine/gi, tag: '#JointCare' },
+    { match: /heart|cardiovascular|cholesterol|blood\s*pressure/gi, tag: '#HeartHealth' },
+    { match: /sleep|insomnia|rest|relax/gi, tag: '#SleepSupport' },
+    { match: /stress|anxiety|mood|calm/gi, tag: '#StressRelief' },
+    { match: /energy|fatigue|tired|vitality|stamina/gi, tag: '#EnergyBoost' },
+    { match: /detox|toxin|cleanse|purif/gi, tag: '#Detox' },
+    { match: /anti.aging|aging|wrinkle|collagen/gi, tag: '#AntiAging' },
+    { match: /skin|beauty|hair|nail/gi, tag: '#Beauty' },
+    { match: /weight|lose\s*weight|slim|diet/gi, tag: '#WeightManagement' },
+    { match: /vision|eye|sight/gi, tag: '#EyeHealth' },
+    { match: /diabet|blood\s*sugar|glucose/gi, tag: '#BloodSugar' },
+    { match: /antioxidant|free\s*radical/gi, tag: '#Antioxidant' },
+    // Product types
+    { match: /vitamin|mineral|supplement/gi, tag: '#Supplement' },
+    { match: /omega|fish\s*oil/gi, tag: '#Omega3' },
+    { match: /probiotic|prebiotic|lactobacillus/i, tag: '#Probiotics' },
+    { match: /protein|amino\s*acid/gi, tag: '#Protein' },
+    { match: /herbal|botanical|extract|natural/gi, tag: '#Herbal' },
+    // Lifestyle
+    { match: /vegan|plant.based|vegetarian/gi, tag: '#Vegan' },
+    { match: /organic|natural\s*ingredient/gi, tag: '#Organic' },
+    { match: /sport|fitness|workout|muscle/gi, tag: '#Fitness' },
+    { match: /pregnant|prenatal|maternity|breastfeeding/gi, tag: '#Pregnancy' },
+    { match: /child|kid|baby|infant|toddler/gi, tag: '#Kids' },
+    { match: /elder|senior|aging/gi, tag: '#SeniorHealth' },
+    // Claims limitation
+    { match: /health\s*supplement|dietary\s*supplement/gi, tag: '#HealthSupplement' },
+  ];
+
+  for (const p of enPatterns) {
+    if (p.match.test(allText)) {
+      tags.add(p.tag);
+    }
+  }
+
+  // Also extract brand name (first capitalized word from product name)
+  const nameWords = (productName || '').match(/[A-Z][a-z]+/g) || [];
+  for (const w of nameWords) {
+    if (w.length >= 3 && !['The', 'For', 'With', 'And', 'This', 'That', 'From', 'Your'].includes(w)) {
+      tags.add('#' + w);
+    }
+  }
+
+  return Array.from(tags).sort().slice(0, 8).join(' ');
+}
+
 // ==========================================
 // UI FUNCTIONS
 // ==========================================
@@ -1811,14 +1871,17 @@ function renderResults(results, parsedData, resultsEn) {
 
     // Right column — English (scrollable, matched height)
     html += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;"><div style="overflow-y:auto;flex:1;padding-left:12px;border-left:2px solid #eee;">';
-    if (rEn && rEn.text) {
+    // Package Text has no English version — skip English column
+    if (isPackageSection) {
+      html += '<div style="font-size:12px;color:#ccc;text-align:center;padding:20px;">此部份無分中/英文版本</div>';
+    } else if (rEn && rEn.text) {
       html += '<div style="font-size:11px;color:#888;margin-bottom:4px;">🇬🇧 English</div>';
       html += `<div class="preview-text">${highlightViolations(rEn.text, rEn.issues)}</div>`;
     } else {
       html += '<div style="font-size:12px;color:#ccc;text-align:center;padding:20px;">🇬🇧 No English data available</div>';
     }
-    // English violations
-    if (rEn && rEn.issues && rEn.issues.length > 0) {
+    // English violations — skip for package text (no English version)
+    if (!isPackageSection && rEn && rEn.issues && rEn.issues.length > 0) {
       var sortedEn = rEn.issues.slice();
       sortedEn.forEach(function(ii) {
         if (ii.rule && ii.rule.section) ii._sectionSort = ii.rule.section;
@@ -1833,12 +1896,12 @@ function renderResults(results, parsedData, resultsEn) {
     } else if (rEn) {
       html += '<p style="text-align:center;padding:12px;color:#27ae60;margin-top:8px;">✅ No violations found</p>';
     }
-    // English rewrite
-    if (rEn && rEn.text) {
+    // English rewrite — skip for package text (no English version)
+    if (!isPackageSection && rEn && rEn.text) {
       var enRewrite = generateSmartRewrite(rEn.text);
       // For English tag section with no content, suggest hashtags from English data
       if (isHashtagSection && (!rEn.text || rEn.text.trim().length < 3)) {
-        var enSuggested = suggestHashtags(
+        var enSuggested = suggestEnglishHashtags(
           parsedEn ? parsedEn.skuName : '',
           parsedEn ? parsedEn.shortDesc : '',
           parsedEn ? parsedEn.detailDesc : ''
