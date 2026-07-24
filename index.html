@@ -1698,6 +1698,18 @@ async function fetchAndParseProduct(sku, lang) {
     result.packageText = '';
     result.packageImages = allImgMeta.length > 0 ? allImgMeta : [];
   }
+  // 6h. Override with extension DOM-extracted images (more reliable than SSR HTML)
+  if (window._extensionPackageImages && window._extensionPackageImages.length > 0) {
+    result.packageImages = window._extensionPackageImages;
+    // Also try to use extension data for other text fields if empty
+    if (window._extensionProductData) {
+      var ed = window._extensionProductData;
+      if (!result.skuName && ed.skuName) result.skuName = ed.skuName;
+      if (!result.shortDesc && ed.shortDesc) result.shortDesc = ed.shortDesc;
+      if (!result.detailDesc && ed.detailDesc) result.detailDesc = ed.detailDesc;
+      if (!result.extra && ed.extra) result.extra = ed.extra;
+    }
+  }
   // If OCR results exist from a previous run, merge into packageText
   if (window._pendingOcrResults && window._pendingOcrResults.length > 0) {
     var ocrText = window._pendingOcrResults.join('\n\n');
@@ -2295,6 +2307,33 @@ buildKeywordTable();
 
 // Fetch product • legacy alias kept for compatibility
 const fetchProductAndAnalyze = fetchAndParseProduct;
+// Browser Extension Listener — receive product data from HKTVmall QA Checker Extension
+window.addEventListener('hktv-qa-extension-data', function(e) {
+  var extData = e.detail;
+  if (!extData || !extData.sku) return;
+
+  // Auto-fill the SKU input and trigger check
+  var skuInput = document.getElementById('skuAutoInput');
+  if (skuInput) {
+    skuInput.value = extData.sku;
+    // Also store the extracted package data for OCR
+    if (extData.packageImages && extData.packageImages.length > 0) {
+      window._extensionPackageImages = extData.packageImages;
+      window._extensionProductData = extData;
+    }
+    // Auto-trigger check with a flag to use extension data for images
+    if (typeof autoCheckSKU === 'function') {
+      autoCheckSKU();
+    }
+  }
+});
+
+// Check if page was opened by extension (URL param)
+if (window.location.search.includes('extension=true')) {
+  // Dashboard was opened by extension — listen for data
+  console.log('🩺 Extension mode active — waiting for product data...');
+}
+
 </script>
 </body>
 </html>
