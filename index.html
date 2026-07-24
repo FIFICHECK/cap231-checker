@@ -1827,10 +1827,11 @@ function renderResults(results, parsedData, resultsEn) {
           <span class="arrow">▼</span>
         </div>
       </div>
-      <div class="result-body" style="display:flex;gap:12px;">`;
+      <div class="result-body" style="display:${isPackageSection ? 'block' : 'flex'};gap:12px;">`;
 
     // Left column — Chinese (scrollable, matched height)
-    html += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;"><div style="overflow-y:auto;flex:1;">';
+    var chineseColStyle = isPackageSection ? 'flex:1;min-width:0;' : 'flex:1;min-width:0;display:flex;flex-direction:column;';
+    html += '<div style="' + chineseColStyle + '"><div style="overflow-y:auto;flex:1;">';
     html += '<div style="font-size:11px;color:#888;margin-bottom:4px;">🇭🇰 中文</div>';
     // Show original text with RED highlighted violations
     if (r.text) {
