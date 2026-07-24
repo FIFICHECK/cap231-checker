@@ -1917,11 +1917,13 @@ function renderResults(results, parsedData, resultsEn) {
     if (isPackageSection) {
       html += '<div style="font-size:12px;color:#ccc;text-align:center;padding:20px;">此部份無分中/英文版本</div>';
     } else if (isHashtagSection) {
-      html += '<div style="font-size:11px;color:#888;margin-bottom:4px;">🇬🇧 English</div>';
+      var enTagHeader = '🇬🇧 English (標籤建議來自中文翻譯 ↓)';
       if (rEn && rEn.text) {
-        html += `<div class="preview-text">${highlightViolations(rEn.text, rEn.issues)}</div>`;
+        enTagHeader = '🇬🇧 English (標籤建議來自中文翻譯 ↓)';
+        html += '<div style="font-size:11px;color:#888;margin-bottom:4px;">' + enTagHeader + '</div>';
+        html += `<div class=\"preview-text\">${highlightViolations(rEn.text, rEn.issues)}</div>`;
       } else {
-        html += '<div style="font-size:12px;color:#999;padding:8px 0;">標籤建議來自中文翻譯 ↓</div>';
+        html += '<div style="font-size:11px;color:#888;margin-bottom:4px;">' + enTagHeader + '</div>';
       }
     } else if (rEn && rEn.text) {
       html += '<div style="font-size:11px;color:#888;margin-bottom:4px;">🇬🇧 English</div>';
