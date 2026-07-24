@@ -1939,11 +1939,16 @@ function nl2br(text) {
 }
 function highlightViolations(text, issues) {
   if (!text) return '';
-  // Process issues in reverse position order so spans don't shift indices
+  // Sort descending by position so replacements don't shift indices
   var sorted = (issues || []).slice().sort(function(a, b) {
     return (b.position || 0) - (a.position || 0);
   });
   var result = escapeHtml(text);
+  // First collapse excessive newlines for cleaner display
+  result = result.replace(/\n{3,}/g, '\n\n');
+  // Ensure hyphens at line starts are formatted as proper bullets
+  result = result.replace(/^[-]\s*/gm, '- ');
+  result = result.replace(/\n[-]\s*/g, '\n- ');
   for (var i = 0; i < sorted.length; i++) {
     var issue = sorted[i];
     var kw = issue.keyword.replace(/\*/g, '');
