@@ -995,7 +995,11 @@ async function runAutoOCROnImages() {
   }
 
   var allResults = [];
-  var proxyBase = 'https://corsproxy.io/?url=';
+  var proxies = [
+    'https://corsproxy.io/?url=',
+    'https://api.allorigins.win/raw?url='
+  ];
+  var proxyIdx = 0;
 
   for (var i = 0; i < images.length; i++) {
     var imgMeta = images[i];
@@ -1003,44 +1007,49 @@ async function runAutoOCROnImages() {
 
     statusEl.textContent = '📥 下載圖片 ' + (i+1) + '/' + images.length + '：' + imgMeta.src.split('/').pop().substring(0, 40);
 
-    try {
-      // Fetch image via CORS proxy
-      var proxyUrl = proxyBase + encodeURIComponent(imgMeta.src);
-      var resp = await fetch(proxyUrl);
-      var blob = await resp.blob();
+    var ok = false;
+    for (var attempt = 0; attempt < proxies.length; attempt++) {
+      try {
+        var proxyUrl = proxies[(proxyIdx++) % proxies.length] + encodeURIComponent(imgMeta.src);
+        var resp = await fetch(proxyUrl);
+        if (!resp.ok) continue;
+        var blob = await resp.blob();
 
-      // Create an Image element to draw on canvas
-      var imgEl = document.createElement('img');
-      var imgUrl = URL.createObjectURL(blob);
-      await new Promise(function(resolve, reject) {
-        imgEl.onload = resolve;
-        imgEl.onerror = reject;
-        imgEl.src = imgUrl;
-        // Timeout
-        setTimeout(reject, 15000);
-      });
+        // Create an Image element to draw on canvas
+        var imgEl = document.createElement('img');
+        var imgUrl = URL.createObjectURL(blob);
+        await new Promise(function(resolve, reject) {
+          imgEl.onload = resolve;
+          imgEl.onerror = reject;
+          imgEl.src = imgUrl;
+          setTimeout(reject, 15000);
+        });
 
-      statusEl.textContent = '📸 OCR ' + (i+1) + '/' + images.length + '：' + (imgMeta.alt || 'image ' + (i+1)).substring(0, 30) + '...';
+        statusEl.textContent = '📸 OCR ' + (i+1) + '/' + images.length + '：' + (imgMeta.alt || 'image ' + (i+1)).substring(0, 30) + '...';
 
-      var ocrResult = await Tesseract.recognize(imgEl, 'chi_sim+eng', {
-        logger: function(m) {
-          if (m.status === 'recognizing text') {
-            statusEl.textContent = '📸 OCR ' + (i+1) + '/' + images.length + '：' + Math.round(m.progress * 100) + '%';
+        var ocrResult = await Tesseract.recognize(imgEl, 'chi_sim+eng', {
+          logger: function(m) {
+            if (m.status === 'recognizing text') {
+              statusEl.textContent = '📸 OCR ' + (i+1) + '/' + images.length + '：' + Math.round(m.progress * 100) + '%';
+            }
           }
-        }
-      });
+        });
 
-      URL.revokeObjectURL(imgUrl);
-      var text = (ocrResult.data.text || '').trim();
-      if (text) {
-        allResults.push('【' + (imgMeta.alt || 'Image ' + (i+1)).substring(0, 40) + '】\n' + text);
-      } else {
-        allResults.push('【' + (imgMeta.alt || 'Image ' + (i+1)).substring(0, 40) + '】\n（無法識別文字）');
+        URL.revokeObjectURL(imgUrl);
+        var text = (ocrResult.data.text || '').trim();
+        if (text) {
+          allResults.push('【' + (imgMeta.alt || 'Image ' + (i+1)).substring(0, 40) + '】\\n' + text);
+        } else {
+          allResults.push('【' + (imgMeta.alt || 'Image ' + (i+1)).substring(0, 40) + '】\\n（無法識別文字）');
+        }
+        ok = true;
+        break; // Success — exit proxy loop
+      } catch (err) {
+        if (attempt === proxies.length - 1) {
+          allResults.push('【' + (imgMeta.alt || 'Image ' + (i+1)).substring(0, 40) + '】\\n（圖片錯誤：' + (err.message || err).substring(0, 50) + '）');
+        }
       }
-    } catch (err) {
-      allResults.push('【' + (imgMeta.alt || 'Image ' + (i+1)).substring(0, 40) + '】\n（圖片錯誤：' + (err.message || err).substring(0, 50) + '）');
     }
-  }
 
   // Store results and trigger check
   window._ocrResults = allResults;
@@ -1277,6 +1286,13 @@ async function autoCheckSKU() {
   }
 
   renderResults(sections, parsed, sectionsEn);
+
+  // Auto-trigger OCR if package images exist
+  if (parsed && parsed.packageImages && parsed.packageImages.length > 0) {
+    setTimeout(function() {
+      runAutoOCROnImages();
+    }, 800);
+  }
 }
 
 // ==========================================
