@@ -1580,10 +1580,12 @@ async function fetchAndParseProduct(sku, lang) {
     result.extra = validTags.join(' ');
   }
 
-  // 6a. Extract product gallery carousel images — data-primaryimagesrc (rich alt text)
-  const productImgRegex = /<img[\s\S]*?data-primaryimagesrc\s*=\s*["'][^"']+["'][\s\S]*?>/gi;
-  const imgAltTexts = [];
+  // 6a. Extract product gallery carousel images from SSR HTML (multiple patterns)
+  var imgAltTexts = [];
   var allImgMeta = [];
+
+  // Pattern 1: data-primaryimagesrc (rich alt text from carousel)
+  const productImgRegex = /<img[\s\S]*?data-primaryimagesrc\s*=\s*["'][^"']+["'][\s\S]*?>/gi;
   var productImgMatch;
   while ((productImgMatch = productImgRegex.exec(html)) !== null) {
     var tagHtml = productImgMatch[0];
@@ -1641,7 +1643,27 @@ async function fetchAndParseProduct(sku, lang) {
       }
     }
   }
-  // 6e. Always set packageText (even if empty) so section always exists
+  // 6e. Fallback: og:image meta tag (SEO/social share — always in SSR)
+  if (allImgMeta.length === 0) {
+    var ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i);
+    if (ogMatch && ogMatch[1].length > 20) {
+      allImgMeta.push({src: ogMatch[1], alt: '產品圖片 (og:image)', thumb: ogMatch[1]});
+    }
+  }
+  // 6f. Fallback: JSON-LD image
+  if (allImgMeta.length === 0) {
+    var jm = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i);
+    if (jm) {
+      try {
+        var ldData = JSON.parse(jm[1]);
+        var ldImage = ldData.image || (ldData.image && ldData.image.url) || '';
+        if (typeof ldImage === 'string' && ldImage.length > 20) {
+          allImgMeta.push({src: ldImage, alt: '產品圖片 (JSON-LD)', thumb: ldImage});
+        }
+      } catch(e) {}
+    }
+  }
+  // 6g. Set packageText (even if empty) so section always exists
   if (imgAltTexts.length > 0) {
     result.packageText = [...new Set(imgAltTexts)].join(' ');
     result.packageImages = allImgMeta;
