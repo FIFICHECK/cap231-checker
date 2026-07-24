@@ -1281,7 +1281,9 @@ async function fetchAndParseProduct(sku, lang) {
       // Only extract text INSIDE the short-desc span, not the whole row
       var spanMatch = productRemarkMatch[0].match(/<span[^>]*class="[^"]*short-desc[^"]*"[\s\S]*?<\/span>/i);
       if (spanMatch) {
-        var remarkText = spanMatch[0].replace(/<[^>]+>/g, '').trim();
+        var remarkText = spanMatch[0]
+          .replace(/<\/(div|p|tr|td|li)>/gi, '\n')
+          .replace(/<[^>]+>/g, '').trim();
         if (remarkText.length > (result.shortDesc || '').length) {
           result.shortDesc = remarkText.substring(0, 500);
         }
@@ -1553,8 +1555,11 @@ function cleanDescriptionText(text) {
   t = t.replace(/([^\n])((?:主要成份|成份|成分|建議用量|用量|用法|注意事項|警告|儲存方式|貯存|保存方法|適用人群|不適用人群|適合人士|適合|產地|來源|產品規格|規格|有效日期|保質期|原產地|製造商|進口商|代理商|一般保健服量|關注肝臟健康人士服量|肝臟脂肪偏高或肝功能欠佳人士服量|服量)[：:])/g, '$1\n$2');
   // Ensure numbered items like "1)", "2)", "3)" or "(1)" or "1." are on their own line
   t = t.replace(/([^\n])\s*(\d+\s*[\)）.])/g, '$1\n$2');
-  // Ensure each "- " bullet is on its own line (but NOT inside words like "G-NiiB")
-  t = t.replace(/([^\na-zA-Z0-9\u4e00-\u9fff])\s*[-–•·]\s*/g, '$1\n- ');
+  // Ensure each "- " bullet is on its own line — by checking for spaces before hyphen
+  // This correctly handles "memory - Strengthens" (space→bullet) vs "G-NiiB" (no space→keep)
+  t = t.replace(/(?:^|\s)\s*[-–•·]\s+/g, '\n- ');
+  // Also handle hyphen immediately after colon/semicolon: "Benefits:-"
+  t = t.replace(/([:：;；])\s*[-–•·]\s*/g, '$1\n- ');
   // Also handle " -" at start of line (already started newline)
   t = t.replace(/^[-–•·]\s*/gm, '- ');
   // Clean up duplicate newlines
@@ -1952,11 +1957,10 @@ function highlightViolations(text, issues) {
   result = result.replace(/\n{3,}/g, '\n\n');
   // Remove ALL extra blank lines (collapse \n\n to \n) — no spacing between bullets
   result = result.replace(/\n\n+/g, '\n');
-  // Ensure hyphens at line starts are formatted as proper bullets
-  result = result.replace(/^[-–•·]\s*/gm, '- ');
-  result = result.replace(/\n[-–•·]\s*/g, '\n- ');
+  // Ensure hyphens with spaces before are formatted as proper bullets (not inline in words like "G-NiiB")
+  result = result.replace(/(?:^|\s)\s*[-–•·]\s+/g, '\n- ');
   // Also convert inline ":- " or ": - " patterns to proper bullet lines
-  result = result.replace(/[:：]\s*[-–•·]\s*/g, ':\n- ');
+  result = result.replace(/([:：;；])\s*[-–•·]\s*/g, '$1\n- ');
   for (var i = 0; i < sorted.length; i++) {
     var issue = sorted[i];
     var kw = issue.keyword.replace(/\*/g, '');
