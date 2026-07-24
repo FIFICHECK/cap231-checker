@@ -1447,10 +1447,19 @@ async function fetchAndParseProduct(sku, lang) {
     result.detailDesc = bodyText.substring(0, 3000).trim();
   }
 
-  // 5. Extract hashtags (#tags)
-  const hashtagMatches = bodyText.match(/#[\u4e00-\u9fffA-Za-z0-9]+/g);
+  // 5. Extract hashtags (#tags) — filter out CSS color hex values
+  const hashtagMatches = bodyText.match(/#[a-zA-Z0-9\u4e00-\u9fff]+/g);
   if (hashtagMatches) {
-    result.extra = hashtagMatches.join(' ');
+    const validTags = hashtagMatches.filter(function(t) {
+      // Exclude CSS color hex values like #fff, #333, #e94560, etc.
+      if (/^#[a-fA-F0-9]{3,8}$/.test(t) && !/^#[a-zA-Z]/.test(t)) return false;
+      // Exclude very short tags (less than 3 chars after #)
+      if (t.length < 4) return false;
+      // Exclude numeric-only tags
+      if (/^#[0-9]+$/.test(t)) return false;
+      return true;
+    });
+    result.extra = validTags.join(' ');
   }
 
   // 6a. Extract product gallery carousel images — data-primaryimagesrc (rich alt text)
@@ -1763,7 +1772,7 @@ function renderResults(results, parsedData, resultsEn) {
     // Rewrite suggestion with BLUE highlighted changes
     var rewritten = generateRewrite(r.text);
     var smartRewrite = generateSmartRewrite(r.text);
-    var isHashtagSection = r.sectionName && r.sectionName.indexOf('Hashtag') >= 0;
+    var isHashtagSection = r.sectionName && (r.sectionName.indexOf('Hashtag') >= 0 || r.sectionName.indexOf('標籤') >= 0 || r.sectionName.indexOf('Extra') >= 0);
     var isPackageSection = r.sectionName && r.sectionName.indexOf('Package') >= 0;
     var showRewrite = (smartRewrite.text !== r.text);
 
@@ -1827,7 +1836,17 @@ function renderResults(results, parsedData, resultsEn) {
     // English rewrite
     if (rEn && rEn.text) {
       var enRewrite = generateSmartRewrite(rEn.text);
-      if (enRewrite.text !== rEn.text && enRewrite.text) {
+      // For English tag section with no content, suggest hashtags from English data
+      if (isHashtagSection && (!rEn.text || rEn.text.trim().length < 3)) {
+        var enSuggested = suggestHashtags(
+          parsedEn ? parsedEn.skuName : '',
+          parsedEn ? parsedEn.shortDesc : '',
+          parsedEn ? parsedEn.detailDesc : ''
+        );
+        if (enSuggested) {
+          html += '<div class="rewrite-box" style="margin-top:12px;"><div class="rb-label">✏️ Suggested Tags (no existing tags) <button class="copy-btn" onclick="copyText(this)">📋 Copy</button></div><div class="rb-content"><span class="c-added">' + escapeHtml(enSuggested.replace(/\n/g, '<br>')) + '</span></div></div>';
+        }
+      } else if (enRewrite.text !== rEn.text && enRewrite.text) {
         html += '<div class="rewrite-box" style="margin-top:12px;"><div class="rb-label">✏️ Suggested Fix <button class="copy-btn" onclick="copyText(this)">📋 Copy</button></div><div class="rb-content">' + (enRewrite.html) + '</div></div>';
       }
     }
