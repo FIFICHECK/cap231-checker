@@ -1837,6 +1837,17 @@ function renderResults(results, parsedData, resultsEn) {
     if (r.text) {
       html += `<div class="preview-text">${highlightViolations(r.text, r.issues)}</div>`;
     }
+    // For Package Text: also include English text in the same column
+    if (isPackageSection && rEn && rEn.text) {
+      html += '<div style="font-size:11px;color:#888;margin:12px 0 4px;">🇬🇧 English</div>';
+      html += `<div class="preview-text">${highlightViolations(rEn.text, rEn.issues)}</div>`;
+      // English violations for package text
+      if (rEn.issues && rEn.issues.length > 0) {
+        var pkgEnSorted = rEn.issues.slice().sort(function(a,b){return (a.position||0)-(b.position||0);});
+        html += '<div style="margin-top:10px;"><strong>⚠️ Found ' + pkgEnSorted.length + ' potential violations:</strong></div>';
+        pkgEnSorted.forEach(function(i) { html += renderIssue(i, i.rule.risk === 'low'); });
+      }
+    }
     // Violations — show in TEXT ORDER (original position), not grouped by risk level
     if (r.issues && r.issues.length > 0) {
       // Sort by position in original text
@@ -1912,11 +1923,10 @@ function renderResults(results, parsedData, resultsEn) {
     html += '</div></div>';
 
     // Right column — English (scrollable, matched height)
-    html += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;"><div style="overflow-y:auto;flex:1;padding-left:12px;border-left:2px solid #eee;">';
-    // Package Text has no English version — skip English column
-    if (isPackageSection) {
-      html += '<div style="font-size:12px;color:#ccc;text-align:center;padding:20px;">此部份無分中/英文版本</div>';
-    } else if (isHashtagSection) {
+    // Package Text already merged into Chinese column — skip English column
+    if (!isPackageSection) {
+      html += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;"><div style="overflow-y:auto;flex:1;padding-left:12px;border-left:2px solid #eee;">';
+      if (isHashtagSection) {
       var enTagHeader = '🇬🇧 English (標籤建議來自中文翻譯 ↓)';
       if (rEn && rEn.text) {
         enTagHeader = '🇬🇧 English (標籤建議來自中文翻譯 ↓)';
@@ -1969,6 +1979,7 @@ function renderResults(results, parsedData, resultsEn) {
       }
     }
     html += '</div></div>'; // End English column
+    }
 
     html += '</div>'; // End result-body
   });
