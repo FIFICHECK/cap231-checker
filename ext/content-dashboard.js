@@ -2,6 +2,10 @@
 (function() {
   'use strict';
 
+  // Signal to dashboard that extension is installed
+  window.__EXTENSION_LOADED = true;
+  document.documentElement.setAttribute('data-extension-marker', 'hktv-qa');
+
   // Listen for messages from the extension background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'injectProductData') {
