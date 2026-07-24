@@ -767,23 +767,12 @@ function generateRewrite(text) {
 
 // ==========================================
 // HASHTAG SUGGESTION ENGINE
-// ==========================================
 function suggestHashtags(productName, shortDesc, detailDesc) {
   const allText = [productName, shortDesc, detailDesc].filter(Boolean).join(' ');
+  if (!allText.trim()) return '';
   const tags = new Set();
 
-  // 1. Extract brand/product name keywords
-  const nameWords = allText.match(/[A-Za-z0-9]+/g) || [];
-  for (const w of nameWords) {
-    if (w.length >= 4 && w !== 'ESSENTIALE' && w !== 'EPL' && w !== 'MAT') {
-      // Skip common English words
-      if (!['LIVER', 'HEALTH', 'WITH', 'THIS', 'THAT', 'FROM', 'FOOD'].includes(w.toUpperCase())) {
-        tags.add('#' + w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
-      }
-    }
-  }
-
-  // 2. Extract Chinese keywords from description
+  // 1. Extract Chinese keywords from content
   const zhPatterns = [
     // Product type
     { match: /護肝|健肝|肝臟健康|肝臟/g, tag: '#護肝' },
