@@ -180,9 +180,8 @@ footer a { color:#0f3460; }
       <div class="section-label"><span class="num">▶</span> 輸入 SKU ID，系統自動拆解成 5 部份進行分析</div>
       <div style="display:flex;gap:10px;align-items:stretch;">
         <input type="text" id="skuAutoInput" style="flex:1;padding:14px 18px;font-size:16px;border:2px solid #0f3460;border-radius:8px;font-family:inherit;" placeholder="H0888001_S_123456789">
-        <button class="btn btn-primary" id="autoCheckBtn" onclick="autoCheckSKU()" style="font-size:16px;padding:14px 28px;" disabled>🔍 自動檢查</button>
-        <button class="btn btn-secondary" id="extInstallBtn" onclick="showExtInstallModal()" style="font-size:14px;padding:14px 20px;white-space:nowrap;background:#4338ca;color:white;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;">🔌 安裝 Extension</button>
-      </div>
+        <button class="btn btn-primary" id="autoCheckBtn" onclick="autoCheckSKU()" style="font-size:16px;padding:14px 28px;">🔍 自動檢查</button>
+        <button class="btn btn-secondary" id="extInstallBtn" onclick="showExtInstallModal()" style="font-size:13px;padding:12px 18px;white-space:nowrap;background:#4338ca;color:white;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;">🔌 裝 Extension 加強圖像檢查</button>      </div>
     </div>
     <div class="input-hint">💡 系統會 Fetch HKTVmall 產品頁面 → 自動拆解成 產品名稱 / 商品簡介 / 詳細介紹 / 標籤 / 包裝圖片文字 → 逐部份分析平台產品合規 → 每部份提供完整修改建議</div>
   </div>
@@ -2391,49 +2390,24 @@ function closeExtInstallModal() {
   document.getElementById('extInstallModal').style.display = 'none';
 }
 
-// Extension detection — check if extension content script is present
+// Extension detection — if extension detected, show status
 function checkExtensionInstalled() {
-  var btn = document.getElementById('autoCheckBtn');
-  var extBtn = document.getElementById('extInstallBtn');
-  if (window.__EXTENSION_LOADED || window._extensionDetected) {
-    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
-    if (extBtn) { extBtn.style.display = 'none'; }
-    return true;
-  }
-  // Try to detect via custom marker
-  if (document.querySelector('[data-extension-marker]')) {
+  if (window.__EXTENSION_LOADED || window._extensionDetected || document.querySelector('[data-extension-marker]')) {
     window._extensionDetected = true;
-    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
-    if (extBtn) { extBtn.style.display = 'none'; }
+    var extBtn = document.getElementById('extInstallBtn');
+    if (extBtn) {
+      extBtn.innerHTML = '✅ 已安裝 Extension';
+      extBtn.style.background = '#16a34a';
+      extBtn.style.cursor = 'default';
+      extBtn.onclick = null;
+    }
     return true;
   }
   return false;
 }
 
-// Poll for extension detection (it might load after page)
-(function pollExtension() {
-  if (checkExtensionInstalled()) return;
-  // Also detect via event
-  window.addEventListener('hktv-qa-extension-data', function() {
-    window._extensionDetected = true;
-    checkExtensionInstalled();
-  });
-  // Retry every 2 seconds for 30 seconds
-  var retries = 0;
-  var iv = setInterval(function() {
-    retries++;
-    if (checkExtensionInstalled() || retries > 15) {
-      clearInterval(iv);
-      // If extension not found after 30s, show warning on button
-      if (!window._extensionDetected) {
-        var btn = document.getElementById('autoCheckBtn');
-        if (btn) {
-          btn.title = '請先安裝 Extension（點「🔌 安裝 Extension」按鈕）';
-        }
-      }
-    }
-  }, 2000);
-})();
+// Quick check on load
+setTimeout(checkExtensionInstalled, 1000);
 
 </script>
 </body>
