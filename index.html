@@ -798,6 +798,27 @@ function suggestHashtags(productName, shortDesc, detailDesc) {
     { match: /保健品|健康食品/g, tag: '#保健品' },
     // General
     { match: /肝/g, tag: '#肝臟健康' },
+    // Additional patterns for more coverage
+    { match: /關節|骨骼|軟骨/g, tag: '#關節骨骼' },
+    { match: /心臟|心血管|血壓|膽固醇/g, tag: '#心血管健康' },
+    { match: /血糖|糖尿/g, tag: '#血糖管理' },
+    { match: /視力|眼睛|眼/g, tag: '#護眼' },
+    { match: /皮膚|肌膚|美肌/g, tag: '#美容護膚' },
+    { match: /頭髮|髮/g, tag: '#護髮' },
+    { match: /睡|失眠|助眠/g, tag: '#改善睡眠' },
+    { match: /記憶|專注|集中/g, tag: '#增強記憶' },
+    { match: /鼻敏|鼻/g, tag: '#鼻敏' },
+    { match: /咳嗽|氣管|喉嚨/g, tag: '#喉嚨氣管' },
+    { match: /壓力|情緒|放鬆/g, tag: '#放鬆減壓' },
+    { match: /去水腫|去濕/g, tag: '#去水腫' },
+    { match: /暖宮|調經|女性/g, tag: '#女性健康' },
+    { match: /男士|男性/g, tag: '#男士健康' },
+    { match: /兒童|bb|嬰兒/g, tag: '#兒童健康' },
+    { match: /長者|老年|銀髮/g, tag: '#長者健康' },
+    { match: /有機|天然/g, tag: '#有機天然' },
+    { match: /無添加|無糖|無防腐/g, tag: '#無添加' },
+    { match: /運動|健身|增肌/g, tag: '#運動健身' },
+    { match: /減肥|瘦身|纖體/g, tag: '#瘦身' },
   ];
 
   for (const p of zhPatterns) {
@@ -824,6 +845,37 @@ function suggestHashtags(productName, shortDesc, detailDesc) {
 
   // Limit to 8 tags max
   return sorted.slice(0, 8).join(' ');
+}
+
+// Translate Chinese hashtags to English equivalents for EN column
+function translateHashtags(zhTags) {
+  if (!zhTags) return '';
+  const translationMap = {
+    '#護肝': '#LiverCare', '#肝臟健康': '#LiverHealth',
+    '#益生菌': '#Probiotics', '#益生元': '#Prebiotics',
+    '#維他命': '#Vitamins', '#蛋白質': '#Protein',
+    '#膠原蛋白': '#Collagen', '#補鈣': '#Calcium',
+    '#魚油': '#FishOil', '#抗氧化': '#Antioxidant',
+    '#捱夜': '#NightOwl', '#飲酒': '#Drinking',
+    '#吸煙': '#Smoking', '#紓解疲勞': '#AntiFatigue',
+    '#排毒': '#Detox', '#腸胃健康': '#GutHealth',
+    '#免疫力': '#Immunity', '#新陳代謝': '#Metabolism',
+    '#高糖高脂': '#LowSugar', '#忙碌生活': '#BusyLife',
+    '#保健品': '#HealthSupplement',
+    '#關節骨骼': '#JointCare', '#心血管健康': '#HeartHealth',
+    '#血糖管理': '#BloodSugar', '#護眼': '#EyeCare',
+    '#美容護膚': '#Skincare', '#護髮': '#HairCare',
+    '#改善睡眠': '#SleepBetter', '#增強記憶': '#MemoryBoost',
+    '#鼻敏': '#Allergy', '#喉嚨氣管': '#Respiratory',
+    '#放鬆減壓': '#StressRelief', '#去水腫': '#AntiEdema',
+    '#女性健康': '#WomensHealth', '#男士健康': '#MensHealth',
+    '#兒童健康': '#KidsHealth', '#長者健康': '#SeniorHealth',
+    '#有機天然': '#Organic', '#無添加': '#NoAdditives',
+    '#運動健身': '#Fitness', '#瘦身': '#WeightLoss',
+  };
+  const tags = zhTags.split(' ');
+  const translated = tags.map(function(t) { return translationMap[t] || t; });
+  return translated.join(' ');
 }
 
 // English-only hashtag suggestion from English product text
@@ -1888,15 +1940,17 @@ function renderResults(results, parsedData, resultsEn) {
     // English rewrite — skip for package text (no English version)
     if (!isPackageSection && rEn && rEn.text) {
       var enRewrite = generateSmartRewrite(rEn.text);
-      // For English tag section with no content, suggest hashtags from English data
+      // For English tag section with no content, suggest hashtags by translating Chinese suggestions
       if (isHashtagSection && (!rEn.text || rEn.text.trim().length < 3)) {
-        var enSuggested = suggestEnglishHashtags(
-          parsedEn ? parsedEn.skuName : '',
-          parsedEn ? parsedEn.shortDesc : '',
-          parsedEn ? parsedEn.detailDesc : ''
+        // First get Chinese suggestions, then translate to English
+        var zhSuggested = suggestHashtags(
+          parsedData ? parsedData.skuName : '',
+          parsedData ? parsedData.shortDesc : '',
+          parsedData ? parsedData.detailDesc : ''
         );
+        var enSuggested = translateHashtags(zhSuggested);
         if (enSuggested) {
-          html += '<div class="rewrite-box" style="margin-top:12px;"><div class="rb-label">✏️ Suggested Tags (no existing tags) <button class="copy-btn" onclick="copyText(this)">📋 Copy</button></div><div class="rb-content"><span class="c-added">' + escapeHtml(enSuggested.replace(/\n/g, '<br>')) + '</span></div></div>';
+          html += '<div class="rewrite-box" style="margin-top:12px;"><div class="rb-label">✏️ Suggested Tags (EN) <button class="copy-btn" onclick="copyText(this)">📋 Copy</button></div><div class="rb-content"><span class="c-added">' + escapeHtml(enSuggested.replace(/\n/g, '<br>')) + '</span></div></div>';
         }
       } else if (enRewrite.text !== rEn.text && enRewrite.text) {
         html += '<div class="rewrite-box" style="margin-top:12px;"><div class="rb-label">✏️ Suggested Fix <button class="copy-btn" onclick="copyText(this)">📋 Copy</button></div><div class="rb-content">' + (enRewrite.html) + '</div></div>';
