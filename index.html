@@ -2409,6 +2409,204 @@ function checkExtensionInstalled() {
 // Quick check on load
 setTimeout(checkExtensionInstalled, 1000);
 
+// ============================================================================
+// PDP DISCLAIMER CHECK — Restricted Food Categories (from HKTVmall PDP docs)
+// ============================================================================
+const PDP_CATEGORIES = [
+  {
+    id: 'frozen_meat',
+    zh: '預先包裝冷藏肉',
+    en: 'Prepackaged Frozen Meat',
+    license: '0398801038',
+    endorsement_zh: '網上售賣預先包裝冷藏肉類(冷藏:牛肉, 豬肉, 羊肉)',
+    endorsement_en: 'Online Sale of Prepackaged Frozen Meat (Frozen : Beef, Pork, Mutton)',
+    keywords: ['冷藏肉', '急凍肉', 'frozen meat', '冷藏牛肉', '冷藏豬肉', '冷藏羊肉']
+  },
+  {
+    id: 'frozen_confections',
+    zh: '原廠盛杯及包裹物盛載的冰凍甜點',
+    en: 'Frozen Confections',
+    license: '0398801074',
+    endorsement_zh: '網上售賣原廠盛杯及包裹物盛載的冰凍甜點',
+    endorsement_en: 'Online Sale of Frozen Confections sold in Manufacturers\' Cups and Wrappers',
+    keywords: ['冰凍甜點', '雪糕', 'ice cream', 'frozen confection', '冰條']
+  },
+  {
+    id: 'frozen_shellfish',
+    zh: '預先包裝冷凍（冰鮮）及冷藏介貝類水產動物',
+    en: 'Prepackaged Chilled and Frozen Shell Fish',
+    license: '0398801029',
+    endorsement_zh: '網上售賣預先包裝冷凍（冰鮮）及冷藏介貝類水產動物',
+    endorsement_en: 'Online Sale of Prepackaged Chilled and Frozen Shell Fish',
+    keywords: ['冷藏介貝類', '急凍海鮮', 'frozen shell fish', '冷藏帶子', '冷藏青口', '冷凍貝類']
+  },
+  {
+    id: 'frozen_game',
+    zh: '預先包裝冷藏野味',
+    en: 'Prepackaged Frozen Game',
+    license: '0398801083',
+    endorsement_zh: '網上售賣預先包裝冷藏野味',
+    endorsement_en: 'Online Sale of Prepackaged Frozen Game',
+    keywords: ['冷藏野味', '急凍野味', 'frozen game']
+  },
+  {
+    id: 'frozen_poultry',
+    zh: '預先包裝冷藏及進口冰鮮家禽',
+    en: 'Prepackaged Frozen and Imported Chilled Poultry',
+    license: '0398801047',
+    endorsement_zh: '網上售賣預先包裝冷藏及進口冰鮮家禽',
+    endorsement_en: 'Online Sale of Prepackaged Frozen and Imported Chilled Poultry',
+    keywords: ['冷藏家禽', '冰鮮家禽', '急凍雞', 'frozen poultry', ' chilled poultry']
+  },
+  {
+    id: 'chilled_meat',
+    zh: '預先包裝冷凍（冰鮮）肉',
+    en: 'Prepackaged Chilled Meat',
+    license: '0398801223',
+    endorsement_zh: '網上售賣預先包裝冷凍（冰鮮）肉',
+    endorsement_en: 'Online Sale of Prepackaged Chilled Meat',
+    keywords: ['冰鮮肉', '冷凍肉', 'chilled meat', '冰鮮豬', '冰鮮牛']
+  },
+  {
+    id: 'frozen_fish',
+    zh: '預先包裝新鮮、冷凍（冰鮮）及冷藏魚',
+    en: 'Prepackaged Fresh, Chilled and Frozen Fish',
+    license: '0398801092',  // Approximate
+    endorsement_zh: '網上售賣預先包裝新鮮、冷凍（冰鮮）及冷藏魚',
+    endorsement_en: 'Online Sale of Prepackaged Fresh, Chilled and Frozen Fish',
+    keywords: ['冷藏魚', '冰鮮魚', '急凍魚', 'frozen fish', 'chilled fish', '冷凍魚']
+  },
+  {
+    id: 'milk',
+    zh: '奶類及奶類飲品',
+    en: 'Milk and Milk Beverages',
+    license: '0398801065',
+    endorsement_zh: '網上售賣奶類及奶類飲品',
+    endorsement_en: 'Online Sale of Milk and Milk Beverages',
+    keywords: ['奶類', '牛奶', '奶類飲品', 'milk', 'milk beverage']
+  },
+  {
+    id: 'sushi_sashimi',
+    zh: '預先包裝壽司及刺身',
+    en: 'Prepackaged Sushi and Sashimi',
+    license: '0398801092',
+    endorsement_zh: '網上售賣預先包裝壽司及刺身',
+    endorsement_en: 'Online Sale of Prepackaged Sushi and Sashimi',
+    keywords: ['壽司', '刺身', 'sushi', 'sashimi', '魚生']
+  },
+  {
+    id: 'oysters_raw',
+    zh: '預先包裝供不經烹煮而食用的蠔',
+    en: 'Prepackaged Oysters to be Eaten in Raw State',
+    license: '0398801232',
+    endorsement_zh: '網上售賣預先包裝供不經烹煮而食用的蠔',
+    endorsement_en: 'Online Sale of Prepackaged Oysters to be Eaten in Raw State',
+    keywords: ['生蠔', 'oyster', '即食蠔', 'raw oyster']
+  },
+  {
+    id: 'hairy_crab',
+    zh: '介貝類水產動物(大閘蟹)',
+    en: 'Shell Fish (Hairy Crab)',
+    license: '0398801515',
+    endorsement_zh: '網上售賣介貝類水產動物(大閘蟹)',
+    endorsement_en: 'Online Sale of Shell Fish (Hairy Crab)',
+    keywords: ['大閘蟹', 'hairy crab', '蟹']
+  }
+];
+
+/**
+ * Check if a product has the correct PDP Disclaimer for restricted food
+ * @param {Object} parsed - Parsed product data (skuName, shortDesc, detailDesc)
+ * @returns {Object|null} - { matchedCategory, hasDisclaimer, issues } or null if not applicable
+ */
+function checkPDPDisclaimer(parsed) {
+  if (!parsed) return null;
+
+  var fullText = [parsed.skuName || '', parsed.shortDesc || '', parsed.detailDesc || ''].join(' ').toLowerCase();
+
+  // 1. Detect if product is a restricted food category
+  var matchedCategory = null;
+  for (var i = 0; i < PDP_CATEGORIES.length; i++) {
+    var cat = PDP_CATEGORIES[i];
+    for (var k = 0; k < cat.keywords.length; k++) {
+      if (fullText.indexOf(cat.keywords[k].toLowerCase()) !== -1) {
+        matchedCategory = cat;
+        break;
+      }
+    }
+    if (matchedCategory) break;
+  }
+
+  if (!matchedCategory) return null; // Not a restricted food product
+
+  // 2. Check if PDP disclaimer text is present
+  var hasPermitNo = fullText.indexOf(matchedCategory.license) !== -1;
+  var hasEndorsement = fullText.indexOf(matchedCategory.endorsement_zh.toLowerCase()) !== -1 ||
+                       fullText.indexOf(matchedCategory.endorsement_en.toLowerCase()) !== -1;
+  var hasDisclaimer = hasPermitNo || hasEndorsement;
+
+  // 3. Check for any restricted food permit mention
+  var anyPermitMention = fullText.indexOf('受限制食物售賣許可證') !== -1 ||
+                         fullText.indexOf('restricted food permit') !== -1 ||
+                         fullText.indexOf('許可證號碼') !== -1 ||
+                         fullText.indexOf('permit no') !== -1;
+
+  return {
+    matchedCategory: matchedCategory,
+    hasDisclaimer: hasDisclaimer,
+    anyPermitMention: anyPermitMention,
+    hasPermitNo: hasPermitNo,
+    hasEndorsement: hasEndorsement,
+    isRestrictedFood: true
+  };
+}
+
+// Enhance renderResults to include PDP Disclaimer check
+(function() {
+  var origRenderResults = renderResults;
+  window.renderResults = function(results, parsedData, resultsEn) {
+    // Run PDP Disclaimer check
+    var pdpCheck = checkPDPDisclaimer(parsedData);
+
+    // Call original renderResults
+    origRenderResults.call(this, results, parsedData, resultsEn);
+
+    // If PDP check triggered, append PDP section to results
+    if (pdpCheck && pdpCheck.isRestrictedFood) {
+      var container = document.getElementById('resultsContainer');
+      if (!container) return;
+
+      var pdpHtml = '<div class="card" style="margin-top:12px;border-left:4px solid ' +
+        (pdpCheck.hasDisclaimer ? '#27ae60' : '#e94560') + ';">';
+      pdpHtml += '<div class="result-header" style="padding:12px 16px;cursor:pointer;" onclick="toggleSection(this)">';
+      pdpHtml += '<span style="font-size:11px;padding:2px 8px;border-radius:4px;margin-right:8px;' +
+        (pdpCheck.hasDisclaimer ? 'background:#efe;color:#27ae60;' : 'background:#fee;color:#e94560;') + '">' +
+        (pdpCheck.hasDisclaimer ? '✅' : '🔴') + '</span>';
+      pdpHtml += '<strong>6. 📋 PDP Disclaimer — 受限制食物售賣許可證</strong>';
+      pdpHtml += ' <span style="font-size:11px;color:#888;">' + (pdpCheck.hasDisclaimer ? '已填寫 ✅' : '⚠️ 未填寫') + '</span>';
+      pdpHtml += '</div>';
+      pdpHtml += '<div class="result-body" style="padding:12px 16px;display:block;">';
+      pdpHtml += '<div style="font-size:13px;margin-bottom:8px;">🔍 偵測到產品類別：<strong>' + pdpCheck.matchedCategory.zh + '</strong></div>';
+      pdpHtml += '<div style="font-size:12px;color:#555;margin-bottom:8px;">許可證號碼：' + pdpCheck.matchedCategory.license + '</div>';
+
+      if (pdpCheck.hasDisclaimer) {
+        pdpHtml += '<div style="background:#f0fdf4;padding:10px;border-radius:6px;font-size:13px;color:#16a34a;">';
+        pdpHtml += '✅ PDP Disclaimer 已填寫 — 許可證號碼/批簽資料正確</div>';
+      } else {
+        pdpHtml += '<div style="background:#fef2f2;padding:10px;border-radius:6px;font-size:13px;color:#dc2626;">';
+        pdpHtml += '⚠️ 未檢測到「' + pdpCheck.matchedCategory.zh + '」嘅 PDP Disclaimer<br>';
+        pdpHtml += '<span style="font-size:12px;color:#666;">需要喺商品簡介或詳細介紹加入：</span><br>';
+        pdpHtml += '<span style="font-size:12px;font-family:monospace;background:#f0f0f0;padding:2px 6px;border-radius:3px;">受限制食物售賣許可證號碼: ' + pdpCheck.matchedCategory.license + '</span><br>';
+        pdpHtml += '<span style="font-size:12px;font-family:monospace;background:#f0f0f0;padding:2px 6px;border-radius:3px;">批簽/批准: ' + pdpCheck.matchedCategory.endorsement_zh + '</span>';
+        pdpHtml += '</div>';
+      }
+      pdpHtml += '</div></div>';
+
+      container.insertAdjacentHTML('beforeend', pdpHtml);
+    }
+  };
+})();
+
 </script>
 </body>
 </html>
