@@ -1940,17 +1940,18 @@ function renderResults(results, parsedData, resultsEn) {
     // English rewrite — skip for package text (no English version)
     if (!isPackageSection && rEn && rEn.text) {
       var enRewrite = generateSmartRewrite(rEn.text);
-      // For English tag section with no content, suggest hashtags by translating Chinese suggestions
-      if (isHashtagSection && (!rEn.text || rEn.text.trim().length < 3)) {
-        // First get Chinese suggestions, then translate to English
+      // For English tag section: ALWAYS show translated Chinese tag suggestions
+      if (isHashtagSection) {
+        // Get Chinese suggestions, then translate to English
         var zhSuggested = suggestHashtags(
           parsedData ? parsedData.skuName : '',
           parsedData ? parsedData.shortDesc : '',
           parsedData ? parsedData.detailDesc : ''
         );
         var enSuggested = translateHashtags(zhSuggested);
-        if (enSuggested) {
-          html += '<div class="rewrite-box" style="margin-top:12px;"><div class="rb-label">✏️ Suggested Tags (EN) <button class="copy-btn" onclick="copyText(this)">📋 Copy</button></div><div class="rb-content"><span class="c-added">' + escapeHtml(enSuggested.replace(/\n/g, '<br>')) + '</span></div></div>';
+        if (enSuggested && enSuggested.replace(/#/g,'').trim()) {
+          var label = (!rEn.text || rEn.text.trim().length < 3) ? '✏️ Suggested Tags (EN)' : '✏️ Suggested Tags (EN — translated from ZH)';
+          html += '<div class="rewrite-box" style="margin-top:12px;"><div class="rb-label">' + label + ' <button class="copy-btn" onclick="copyText(this)">📋 Copy</button></div><div class="rb-content"><span class="c-added">' + escapeHtml(enSuggested.replace(/\n/g, '<br>')) + '</span></div></div>';
         }
       } else if (enRewrite.text !== rEn.text && enRewrite.text) {
         html += '<div class="rewrite-box" style="margin-top:12px;"><div class="rb-label">✏️ Suggested Fix <button class="copy-btn" onclick="copyText(this)">📋 Copy</button></div><div class="rb-content">' + (enRewrite.html) + '</div></div>';
