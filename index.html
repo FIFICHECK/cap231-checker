@@ -1341,6 +1341,28 @@ async function fetchAndParseProduct(sku, lang) {
     // Strip the heading label itself
     detailText = detailText.replace(headingCleanRegex, '').trim();
 
+    // For English, prefer extraction from HTML <div id="descriptionsTab"> directly
+    // as it's more accurate than body text parsing
+    if (isEnglish) {
+      var enDescTabMatch = html.match(/<div[^>]*id="descriptionsTab"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i);
+      if (!enDescTabMatch) {
+        // Fallback: try looking for tab-content with descriptionsTab or similar
+        enDescTabMatch = html.match(/<div[^>]*(?:id="descriptionsTab"|class="[^"]*tab-content[^"]*")[^>]*>[\s\S]*?(?:<h2[^>]*>[^<]*Description[^<]*<\/h2>|<h3[^>]*>[^<]*Description[^<]*<\/h3>)[\s\S]*?(?=<div[^>]*class="[^"]*tab[^"]*"|<\/div>\s*<\/div>\s*<\/div>)/i);
+      }
+      if (enDescTabMatch) {
+        var enDescText = enDescTabMatch[0]
+          .replace(/<script[\s\S]*?<\/script>/gi, '')
+          .replace(/<style[\s\S]*?<\/style>/gi, '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .replace(/(?:Description|Product Details|Details)\s*/i, '')
+          .trim();
+        if (enDescText.length > 50) {
+          detailText = enDescText;
+        }
+      }
+    }
+
     // Cut off at common page end markers (matched case-insensitively)
     const endPatterns = isEnglish ? [
       'Customer Reviews', 'Reviews', 'Frequently Bought Together', 'Customers Also Viewed',
