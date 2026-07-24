@@ -54,12 +54,26 @@
       if (detail) detailDesc = detail.innerText.trim();
     }
 
-    // 4. Tags / extras
+    // 4. Tags / extras — extract from DOM classes AND full page text
     var tags = [];
-    document.querySelectorAll('[class*="tag"], [class*="hashtag"], .product-tag, .sku-tag').forEach(function(el) {
-      var t = el.innerText.trim();
+    document.querySelectorAll('[class*="tag"], [class*="hashtag"], [class*="keyword"], meta[name="keywords"]').forEach(function(el) {
+      var t = el.innerText || el.content || '';
+      t = t.trim();
       if (t && t.length > 1) tags.push(t);
     });
+    // Also extract #hashtags from full page text (matching SSR approach)
+    var bodyText = document.body.innerText || '';
+    var hashMatches = bodyText.match(/#[a-zA-Z0-9\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]+/g);
+    if (hashMatches) {
+      hashMatches.forEach(function(h) {
+        // Filter out CSS color hex values
+        if (/^#[a-fA-F0-9]{3,8}$/.test(h) && !/^#[a-zA-Z]/.test(h)) return;
+        if (h.length < 4) return;
+        if (/^#[0-9]+$/.test(h)) return;
+        var clean = h.trim();
+        if (clean && tags.indexOf(clean) === -1) tags.push(clean);
+      });
+    }
     // Try meta keywords
     var metaK = document.querySelector('meta[name="keywords"]');
     if (metaK) {
