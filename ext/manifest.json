@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "HKTVmall QA Checker — Extension",
+  "version": "1.0.0",
+  "description": "抽取 HKTVmall 產品頁面嘅 DOM 資料（包括 JS render 後嘅圖片），傳去 QA Checker Dashboard",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.hktvmall.com/*",
+    "https://fificheck.github.io/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icon.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.hktvmall.com/hktv/p/*"],
+      "js": ["content-hktv.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://fificheck.github.io/hktvmall-QA-checker/*"],
+      "js": ["content-dashboard.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "128": "icon.png"
+  }
+}

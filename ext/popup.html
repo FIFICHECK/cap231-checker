@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 380px;
+      font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+      padding: 16px;
+      background: #f5f7fa;
+    }
+    h2 { font-size: 15px; color: #0f3460; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    h2 img { width: 20px; height: 20px; }
+    .status {
+      background: #eef2ff; border-radius: 8px; padding: 12px;
+      font-size: 13px; color: #333; margin-bottom: 12px;
+    }
+    .status.loading { background: #fff8e6; }
+    .status.success { background: #e6f7e6; }
+    .status.error { background: #ffe6e6; }
+    .preview {
+      max-height: 200px; overflow-y: auto;
+      background: white; border-radius: 8px; padding: 10px;
+      font-size: 12px; line-height: 1.5; margin-bottom: 12px;
+    }
+    .preview .img-grid {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+    }
+    .preview .img-grid img {
+      width: 60px; height: 60px; object-fit: cover;
+      border-radius: 4px; border: 1px solid #ddd;
+    }
+    .preview .label { color: #666; font-weight: 600; margin-top: 6px; }
+    .btn {
+      display: block; width: 100%; padding: 12px;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary { background: #0f3460; color: white; }
+    .btn-primary:hover { background: #1a4a7a; }
+    .btn-primary:disabled { background: #999; cursor: not-allowed; }
+    .btn-secondary { background: #e0e7ff; color: #0f3460; margin-top: 8px; }
+    .btn-secondary:hover { background: #c7d2fe; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover { background: #15803d; }
+    .detail { font-size: 12px; color: #666; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <h2>
+    <span>🩺</span>
+    HKTVmall QA Checker
+  </h2>
+
+  <div class="status" id="status">🔄 檢查中...</div>
+
+  <div id="previewArea" style="display:none;">
+    <div class="preview" id="previewContent"></div>
+    <button class="btn btn-success" id="sendBtn">📤 傳送去 Dashboard 檢查</button>
+    <button class="btn btn-secondary" id="extractBtn">🔄 重新抽取資料</button>
+  </div>
+
+  <button class="btn btn-primary" id="extractBtnMain" style="display:none;">🔍 抽取此產品資料</button>
+
+  <div class="detail" style="margin-top:12px;text-align:center;">
+    需要喺 HKTVmall 產品頁面使用
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
